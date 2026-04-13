@@ -90,7 +90,7 @@ export async function get(req: Request, res: Response) {
       statusCode = err.statusCode;
     }
     return res.status(statusCode).json({
-      error: true,
+      error: false,
       data: null,
       message: err.message || USER_MESSAGES.USER_GET_FAILED,
     });
