@@ -1,0 +1,189 @@
+### Auth API Test Suite
+### Base URL
+@baseUrl = http://localhost:4000/api/v1
+@email = test@example.com
+@password = Test@123
+
+### ============================================
+### 1. LOGIN - POST /auth/login
+### ============================================
+
+### Test 1.1: Successful Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Test 1.2: Login with Missing Email
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "password": "{{password}}"
+}
+
+### Test 1.3: Login with Missing Password
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}"
+}
+
+### Test 1.4: Login with Invalid Credentials
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "WrongPassword123"
+}
+
+### Test 1.5: Login with Non-existent User
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "nonexistent@example.com",
+  "password": "{{password}}"
+}
+
+### ============================================
+### 2. ME - GET /auth/me (Requires Authentication)
+### ============================================
+
+### Test 2.1: Get User Details with Valid Token
+GET {{baseUrl}}/auth/me
+Cookie: accessToken=YOUR_ACCESS_TOKEN; refreshToken=YOUR_REFRESH_TOKEN
+
+### Test 2.2: Get User Details without Token
+GET {{baseUrl}}/auth/me
+
+### Test 2.3: Get User Details with Expired Access Token (should rotate)
+GET {{baseUrl}}/auth/me
+Cookie: accessToken=EXPIRED_TOKEN; refreshToken=YOUR_REFRESH_TOKEN
+
+### Test 2.4: Get User Details with Invalid Token
+GET {{baseUrl}}/auth/me
+Cookie: accessToken=invalid_token; refreshToken=invalid_token
+
+### ============================================
+### 3. LOGOUT - POST /auth/logout (Requires Authentication)
+### ============================================
+
+### Test 3.1: Successful Logout
+POST {{baseUrl}}/auth/logout
+Cookie: accessToken=YOUR_ACCESS_TOKEN; refreshToken=YOUR_REFRESH_TOKEN
+
+### Test 3.2: Logout without Token
+POST {{baseUrl}}/auth/logout
+
+### Test 3.3: Logout with Invalid Token
+POST {{baseUrl}}/auth/logout
+Cookie: accessToken=invalid_token; refreshToken=invalid_token
+
+### ============================================
+### 4. RESET PASSWORD - POST /auth/reset-password/:email
+### ============================================
+
+### Test 4.1: Successful Password Reset
+POST {{baseUrl}}/auth/reset-password/{{email}}
+Content-Type: application/json
+
+{
+  "oldPassword": "{{password}}",
+  "newPassword": "NewTest@123"
+}
+
+### Test 4.2: Reset Password with Wrong Old Password
+POST {{baseUrl}}/auth/reset-password/{{email}}
+Content-Type: application/json
+
+{
+  "oldPassword": "WrongPassword",
+  "newPassword": "NewTest@123"
+}
+
+### Test 4.3: Reset Password for Non-existent User
+POST {{baseUrl}}/auth/reset-password/nonexistent@example.com
+Content-Type: application/json
+
+{
+  "oldPassword": "{{password}}",
+  "newPassword": "NewTest@123"
+}
+
+### Test 4.4: Reset Password with Missing Old Password
+POST {{baseUrl}}/auth/reset-password/{{email}}
+Content-Type: application/json
+
+{
+  "newPassword": "NewTest@123"
+}
+
+### Test 4.5: Reset Password with Missing New Password
+POST {{baseUrl}}/auth/reset-password/{{email}}
+Content-Type: application/json
+
+{
+  "oldPassword": "{{password}}"
+}
+
+### ============================================
+### 5. TOKEN ROTATION TEST
+### ============================================
+
+### Test 5.1: Access Protected Route with Expired Access Token
+### This should trigger automatic token rotation
+GET {{baseUrl}}/auth/me
+Cookie: accessToken=EXPIRED_ACCESS_TOKEN; refreshToken=VALID_REFRESH_TOKEN
+
+### ============================================
+### 6. COMPLETE FLOW TEST
+### ============================================
+
+### Step 1: Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Step 2: Get User Details (copy cookies from login response)
+GET {{baseUrl}}/auth/me
+Cookie: accessToken=FROM_LOGIN; refreshToken=FROM_LOGIN
+
+### Step 3: Reset Password
+POST {{baseUrl}}/auth/reset-password/{{email}}
+Content-Type: application/json
+
+{
+  "oldPassword": "{{password}}",
+  "newPassword": "NewTest@123"
+}
+
+### Step 4: Try to access with old token (should fail - tokens revoked)
+GET {{baseUrl}}/auth/me
+Cookie: accessToken=OLD_TOKEN; refreshToken=OLD_TOKEN
+
+### Step 5: Login with new password
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "NewTest@123"
+}
+
+### Step 6: Logout
+POST {{baseUrl}}/auth/logout
+Cookie: accessToken=FROM_NEW_LOGIN; refreshToken=FROM_NEW_LOGIN
+
+### Step 7: Try to access after logout (should fail)
+GET {{baseUrl}}/auth/me
+Cookie: accessToken=FROM_LOGOUT; refreshToken=FROM_LOGOUT

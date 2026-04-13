@@ -1,0 +1,34 @@
+model User {
+    id        String  @id @default(uuid())
+    firstname String
+    lastname  String?
+    email     String  @unique
+
+    username     String?      @unique
+    password     String?
+    authProvider AuthProvider @default(LOCAL)
+
+    profileImg    Bytes?
+    profileImgKey String?
+    isActive      Boolean   @default(false)
+    role          USER_ROLE @default(USER)
+
+    // meta-data
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    tokenIds Token[]
+
+    @@index([id, email, username])
+}
+
+enum USER_ROLE {
+    ADMIN
+    USER
+}
+
+enum AuthProvider {
+    LOCAL
+    GOOGLE
+    META
+}
