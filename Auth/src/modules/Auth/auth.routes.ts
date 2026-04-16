@@ -15,7 +15,7 @@ import { authenticate } from "../../middleware/authenticate";
 export const authRouter = Router();
 
 authRouter.post("/login", login);
-authRouter.post("/logout", authenticate, logout);
+authRouter.get("/logout", authenticate, logout);
 authRouter.get("/me", authenticate, me);
 authRouter.post('/reset-password/:email', reset);
 

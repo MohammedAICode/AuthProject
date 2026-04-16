@@ -314,7 +314,7 @@ export async function logoutUser(user: ReqUser): Promise<void> {
 
 export async function meDetails(
   userId: string,
-): Promise<Omit<User, 'password'>> {
+): Promise<Omit<User, 'password' | 'id'>> {
   logger.info(`[ME] Retrieving details for user ${userId}`);
   
   const user = await prisma.user.findUnique({
@@ -323,6 +323,8 @@ export async function meDetails(
     },
     omit: {
       password: true,
+      id: true
+
     },
   });
 
