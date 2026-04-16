@@ -1,25 +1,11 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { me, type apiResponse } from "../services/authService";
+import { useAuth } from "../hooks/useAuth";
 
 function Home() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    const fetchMe = async () => {
-      const response = await me();
-
-      if (response.err) {
-        navigate("/login");
-      } else {
-        console.log("Me:", response.data);
-      }
-    };
-
-    fetchMe();
-  }, []);
-
-  return <h1>Home Page</h1>;
+  return <h1>Home Page, {user?.firstname}</h1>;
 }
 
 export default Home;
