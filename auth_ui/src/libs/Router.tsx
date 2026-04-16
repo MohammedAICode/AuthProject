@@ -4,6 +4,8 @@ import Login from "../Pages/Login";
 import Signup from "../Pages/Signup";
 import PublicRoutes from "../utils/PublicRoutes";
 import ProtectedRoute from "../utils/ProtectedRoute";
+import Profile from "../Pages/Profile";
+import Forget from "../Pages/Forget";
 
 const CustomRouting = () => {
   return (
@@ -30,6 +32,24 @@ const CustomRouting = () => {
           element={
             <PublicRoutes>
               <Signup />
+            </PublicRoutes>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/forget"
+          element={
+            <PublicRoutes>
+              <Forget />
             </PublicRoutes>
           }
         />

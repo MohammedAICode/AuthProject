@@ -30,3 +30,10 @@ export function convertJsonToUserObj(userJson: any): User {
     username: userJson.username,
   };
 }
+
+export function getInitialOfFullName(fn: string, ln: string) {
+  let fnArr = fn.trim().split(" ");
+  let lnArr = ln.trim().split(" ");
+
+  return fnArr[0].charAt(0) + lnArr[0].charAt(0);
+}

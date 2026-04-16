@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { loginUser, type apiResponse } from "../services/authService";
+import { useAuth } from "../hooks/useAuth";
 
 export interface userLoginInfo {
   email: string | "";
@@ -15,6 +16,8 @@ export default function Login() {
   });
   let [showPass, setShowPass] = useState<boolean>(true);
   let [isError, setIsError] = useState<string | null>(null);
+  let navigate = useNavigate();
+  const { fetchMe } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLoginInfo({
@@ -22,8 +25,6 @@ export default function Login() {
       [e.target.name]: e.target.value,
     });
   };
-
-  
 
   const handleSubmit = async () => {
     if (!LoginInfo.email) {
@@ -47,11 +48,20 @@ export default function Login() {
     }
 
     if (!response.err) {
+      fetchMe();
       navigate("/");
     }
   };
 
-  let navigate = useNavigate();
+  const handleForget = () => {
+    if (!LoginInfo.email) {
+      setIsError("Username cannot be empty!");
+      return;
+    }
+
+    
+
+  };
 
   return (
     <div className="h-screen flex justify-center items-center bg-linear-to-br from-gray-100 to-gray-200">
@@ -99,7 +109,10 @@ export default function Login() {
           </aside>
         </div>
 
-        <p className="text-sm text-right text-secondary cursor-pointer hover:underline">
+        <p
+          className="text-sm text-right text-secondary cursor-pointer hover:underline"
+          onClick={handleForget}
+        >
           Forgot password?
         </p>
 

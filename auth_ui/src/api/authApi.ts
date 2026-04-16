@@ -20,3 +20,9 @@ export const meApi = async () => {
     },
   });
 };
+
+export const logoutApi = async () => {
+  return api.get("/auth/logout");
+};
+
+

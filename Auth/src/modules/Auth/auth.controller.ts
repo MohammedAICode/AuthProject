@@ -15,6 +15,8 @@ import { logger } from "../../lib/logger";
 import { AppError } from "../../common/errors/AppError";
 import { ReqUser } from "../../common/types/express";
 import { userExists } from "../User/user.service";
+import { eventBus } from "../../lib/eventBut";
+import { EVENT_CONSTANTS } from "../../common/EventListener/Listener";
 // import { sendEmail } from "../../lib/simpleEmailService";
 
 export async function login(req: Request, res: Response) {
@@ -157,7 +159,7 @@ export async function reset(req: Request, res: Response) {
     let { email } = req.params;
     let { newPassword, oldPassword } = req.body;
 
-    let userResult = await userExists(email as string, "", "");
+    let userResult = await userExists(email as string, null, null);
 
     if (!userResult) {
       throw new AppError(
@@ -187,6 +189,57 @@ export async function reset(req: Request, res: Response) {
         error: true,
         data: null,
         message: USER_MESSAGES.USER_UPDATE_FAILED,
+      });
+  }
+}
+
+// check the user-exists in the system.
+// if the user exists send the mail. else make the silent closing / logging
+// if present send the email using the ses system. with otp. and the link. which will again re-direct to the otp page.
+// not required the service method.
+
+export async function forgetPassword(req: Request, res: Response) {
+  try {
+    const { email } = req.query;
+    logger.info(
+      `[FORGET_PASSWORD] request to perform the forget password for user: ${email}.`,
+    );
+
+    if (!email) {
+      logger.error(`[FORGET_PASSWORD] email does not exists.`);
+      throw new AppError(
+        ERROR_MESSAGES.USER_EMAIL_REQUIRED,
+        HTTP_STATUS.BAD_REQUEST,
+      );
+    }
+
+    let result = await userExists(email as string, null, null);
+
+    if (!result) {
+      logger.info(
+        `[FORGET_PASSWORD] user does not exits in the system, trying to perform forget password`,
+      );
+    }
+
+    if (result) {
+      // create the event
+      setImmediate(() => {
+        eventBus.emit(EVENT_CONSTANTS.USER_FORGET_PASSWORD, result);
+      });
+    }
+
+    return res.status(HTTP_STATUS.OK).json({
+      error: false,
+      data: null,
+      message: USER_MESSAGES.USER_FORGET_SUCCESS,
+    });
+  } catch (err: any) {
+    return res
+      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json({
+        error: true,
+        data: null,
+        message: USER_MESSAGES.USER_FORGET_FAILED,
       });
   }
 }

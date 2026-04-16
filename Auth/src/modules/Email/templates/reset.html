@@ -1,23 +1,139 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <style>
-        .wrapper { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 8px; border-top: 4px solid #dc3545; }
-        .btn { display: block; width: 200px; margin: 30px auto; padding: 15px; background-color: #333; color: #ffffff !important; text-decoration: none; border-radius: 5px; text-align: center; }
-        .warning { font-size: 12px; color: #d9534f; font-style: italic; }
-    </style>
+  <meta charset="UTF-8" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    .wrapper {
+      padding: 30px 15px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 30px;
+      border-radius: 10px;
+      border-top: 5px solid #dc3545;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #222;
+    }
+
+    p {
+      color: #555;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .btn {
+      display: block;
+      width: 220px;
+      margin: 30px auto;
+      padding: 14px;
+      background-color: #dc3545;
+      color: #ffffff !important;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .otp-box {
+      margin: 25px 0;
+      text-align: center;
+    }
+
+    .otp {
+      display: inline-block;
+      padding: 12px 20px;
+      font-size: 24px;
+      letter-spacing: 6px;
+      background: #f1f3f5;
+      border-radius: 6px;
+      font-weight: bold;
+      color: #222;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 30px 0;
+      color: #aaa;
+      font-size: 12px;
+    }
+
+    .link-box {
+      word-break: break-all;
+      font-size: 12px;
+      color: #007bff;
+      text-align: center;
+    }
+
+    .warning {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #d9534f;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="wrapper">
-        <div class="container">
-            <h2>Reset Your Password</h2>
-            <p>We received a request to reset your password for your <strong>Auth</strong> account. Click the button below to choose a new one:</p>
-            <a href="{{reset_link}}" class="btn">Reset Password</a>
-            <p class="warning">This link will expire in 60 minutes for security reasons.</p>
-            <hr>
-            <p style="font-size: 12px;">If you didn't request this, please change your password immediately or contact support.</p>
-        </div>
+  <div class="wrapper">
+    <div class="container">
+      <h2>Reset Your Password</h2>
+
+      <p>
+        We received a request to reset your password for your <strong>Auth</strong> account.
+      </p>
+
+      <!-- CTA Button -->
+      <a href="{{reset_link}}" class="btn">Reset Password</a>
+
+      <div class="divider">OR</div>
+
+      <!-- OTP Section -->
+      <p style="text-align:center;">Use this One-Time Password (OTP):</p>
+
+      <div class="otp-box">
+        <div class="otp">{{otp}}</div>
+      </div>
+
+      <p style="text-align:center;">
+        Enter this code in the app to continue.
+      </p>
+
+      <!-- Fallback Link -->
+      <p class="link-box">
+        If the button doesn't work, copy & paste this link:<br />
+        {{reset_link}}
+      </p>
+
+      <p class="warning">
+        This OTP and link will expire in 10 minutes for security reasons.
+      </p>
+
+      <hr />
+
+      <p class="footer">
+        If you didn’t request this, you can safely ignore this email. Your account remains secure.
+      </p>
     </div>
+  </div>
 </body>
 </html>

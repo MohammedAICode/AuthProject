@@ -270,7 +270,7 @@ export async function rotateToken(
 
 export async function logoutUser(user: ReqUser): Promise<void> {
   logger.info(`[LOGOUT] Logging out user ${user.userId}`);
-  
+
   let existingTokens = await prisma.token.findMany({
     where: {
       userId: user.userId,
@@ -314,17 +314,16 @@ export async function logoutUser(user: ReqUser): Promise<void> {
 
 export async function meDetails(
   userId: string,
-): Promise<Omit<User, 'password' | 'id'>> {
+): Promise<Omit<User, "password" | "id">> {
   logger.info(`[ME] Retrieving details for user ${userId}`);
-  
+
   const user = await prisma.user.findUnique({
     where: {
       id: userId,
     },
     omit: {
       password: true,
-      id: true
-
+      id: true,
     },
   });
 
@@ -341,7 +340,7 @@ export async function resetPassword(
   oldPassword: string,
   newPassword: string,
   user: User,
-): Promise<Omit<User, 'password'>> {
+): Promise<Omit<User, "password">> {
   logger.info(`[PASSWORD_RESET] Attempting password reset for user ${user.id}`);
 
   if (!user.password) {
@@ -377,7 +376,9 @@ export async function resetPassword(
       password: true,
     },
   });
-  logger.info(`[PASSWORD_RESET] Password updated successfully for user ${user.id}`);
+  logger.info(
+    `[PASSWORD_RESET] Password updated successfully for user ${user.id}`,
+  );
 
   // Revoke all active tokens for security (force re-login)
   const revokeResult = await prisma.token.updateMany({

@@ -11,6 +11,8 @@ import { AppError } from "../errors/AppError";
 import { ERROR_MESSAGES, HTTP_STATUS } from "../constant/constants";
 import { storeRefreshToken } from "../../modules/Auth/auth.service";
 import { validateServices } from "../../modules/ServiceValidation/validate.service";
+import crypto from "crypto";
+
 
 
 export async function startServer() {
@@ -145,6 +147,10 @@ export function convertAuthProvider(authProvider: string): AuthProvider {
     return (authProvider = AuthProvider.META);
   }
   return (authProvider = AuthProvider.LOCAL);
+}
+
+export function generateOTP() {
+  return crypto.randomInt(100000, 1000000).toString();
 }
 
 

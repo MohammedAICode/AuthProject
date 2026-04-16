@@ -7,7 +7,7 @@ const AuthProvider = ({ children }: any) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchMe = async () => {
+   const fetchMe = async () => {
     try {
       const response = await me();
       let convertedUser = convertJsonToUserObj(response.data.data);
@@ -24,7 +24,7 @@ const AuthProvider = ({ children }: any) => {
   }, []);
 
   return (
-    <authContext.Provider value={{ user, setUser, loading }}>
+    <authContext.Provider value={{ user, setUser, loading, fetchMe }}>
       {children}
     </authContext.Provider>
   );

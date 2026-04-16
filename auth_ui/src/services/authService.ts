@@ -1,4 +1,4 @@
-import { loginApi, meApi } from "../api/authApi";
+import { loginApi, logoutApi, meApi } from "../api/authApi";
 import type { userLoginInfo } from "../Pages/Login";
 
 export interface apiResponse {
@@ -33,6 +33,23 @@ export async function me(): Promise<apiResponse> {
     return {
       err: false,
       message: "data fetched successfully",
+      data: response.data,
+    };
+  } catch (err: any) {
+    return {
+      err: true,
+      message: err.response.data.message,
+      data: null,
+    };
+  }
+}
+
+export async function logout(): Promise<apiResponse> {
+  try {
+    let response = await logoutApi();
+    return {
+      err: false,
+      message: "logout successfully",
       data: response.data,
     };
   } catch (err: any) {

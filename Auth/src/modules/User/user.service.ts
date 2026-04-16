@@ -22,15 +22,8 @@ import {
 import { v4 as uuid } from "uuid";
 
 export async function registerUser(req: Request) {
-  let {
-    firstname,
-    lastname,
-    email,
-    username,
-    password,
-    authProvider,
-    role,
-  } = req.body;
+  let { firstname, lastname, email, username, password, authProvider, role } =
+    req.body;
 
   let userId = uuid();
 
@@ -144,7 +137,11 @@ export async function registerUser(req: Request) {
   return result;
 }
 
-export async function userExists(email: string, username: string, id: string) {
+export async function userExists(
+  email: string | null,
+  username: string | null,
+  id: string | null,
+) {
   try {
     let result = null;
 
@@ -206,9 +203,13 @@ export async function getUser(id: string) {
     try {
       let url = await getProfileImageUrl(result.profileImgKey);
       result.profileImgKey = url;
-      logger.info(`[GET USER] Profile image URL generated successfully - userId: ${id}`);
+      logger.info(
+        `[GET USER] Profile image URL generated successfully - userId: ${id}`,
+      );
     } catch (err: any) {
-      logger.error(`[GET USER] Failed to generate signed URL - userId: ${id}, error: ${err.message}`);
+      logger.error(
+        `[GET USER] Failed to generate signed URL - userId: ${id}, error: ${err.message}`,
+      );
       // Return user without profile image URL instead of failing
       result.profileImgKey = null;
     }
@@ -303,11 +304,11 @@ export async function updateUser(
     // profileImg: profileImg
     //   ? (profileImg as unknown as Uint8Array<ArrayBuffer>)
     //   : undefined,
-    profileImgKey: profileImg 
-  ? (imgKey 
-      ? await updateProImg(imgKey, profileImg, id)  // Replace existing
-      : await uploadProfileImgToS3(profileImg, id))  // First upload
-  : undefined,
+    profileImgKey: profileImg
+      ? imgKey
+        ? await updateProImg(imgKey, profileImg, id) // Replace existing
+        : await uploadProfileImgToS3(profileImg, id) // First upload
+      : undefined,
 
     ...(role && {
       role:
@@ -335,12 +336,16 @@ async function updateProImg(
   file: Express.Multer.File,
   userId: string,
 ) {
-  logger.info(`[UPDATE USER] Replacing profile image - userId: ${userId}, oldKey: ${imgKey}`);
-  
+  logger.info(
+    `[UPDATE USER] Replacing profile image - userId: ${userId}, oldKey: ${imgKey}`,
+  );
+
   await deleteProfileImg(imgKey);
   const newKey = await uploadProfileImgToS3(file, userId);
-  
-  logger.info(`[UPDATE USER] Profile image replaced successfully - userId: ${userId}, newKey: ${newKey}`);
-  
+
+  logger.info(
+    `[UPDATE USER] Profile image replaced successfully - userId: ${userId}, newKey: ${newKey}`,
+  );
+
   return newKey;
 }

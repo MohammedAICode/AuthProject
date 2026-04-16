@@ -23,8 +23,6 @@ export const ERROR_MESSAGES = {
   INVALID_ENV: "Server configuration error: Environment values are missing.",
 
   REFRESH_TOKEN_REVOKED: "TOKEN(s) is revoked, login again!",
-
-
 } as const;
 
 export const USER_MESSAGES = {
@@ -39,6 +37,9 @@ export const USER_MESSAGES = {
 
   USER_UPDATE_SUCCESS: "User updated successfully.",
   USER_UPDATE_FAILED: "Failed to update user.",
+
+  USER_FORGET_SUCCESS: "User forget password successful.",
+  USER_FORGET_FAILED: "Failed user forget password.",
 } as const;
 
 export const AUTH_MESSAGES = {
@@ -51,6 +52,10 @@ export const AUTH_MESSAGES = {
 export const EMAIL_MESSAGES = {
   ACTIVATION_EMAIL_SENT: "Activation email sent successfully",
   ACTIVATION_EMAIL_FAILED: "Failed to send activation email",
+
+  FORGET_EMAIL_SENT: "forget email sent successfully",
+  FORGET_EMAIL_FAILED: "Failed to send forget email",
+
 } as const;
 
 export const HTTP_STATUS = {
