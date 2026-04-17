@@ -24,4 +24,4 @@ export function loadTemplate(
   });
 
   return html;
-}
+} 

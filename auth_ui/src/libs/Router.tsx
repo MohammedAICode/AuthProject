@@ -5,7 +5,8 @@ import Signup from "../Pages/Signup";
 import PublicRoutes from "../utils/PublicRoutes";
 import ProtectedRoute from "../utils/ProtectedRoute";
 import Profile from "../Pages/Profile";
-import Forget from "../Pages/Forget";
+import Verify from "../Pages/Verify";
+import SetPassword from "../Pages/SetPassword";
 
 const CustomRouting = () => {
   return (
@@ -46,10 +47,19 @@ const CustomRouting = () => {
         />
 
         <Route
-          path="/forget"
+          path="/verify"
           element={
             <PublicRoutes>
-              <Forget />
+              <Verify />
+            </PublicRoutes>
+          }
+        />
+
+        <Route
+          path="/setPassword"
+          element={
+            <PublicRoutes>
+              <SetPassword />
             </PublicRoutes>
           }
         />

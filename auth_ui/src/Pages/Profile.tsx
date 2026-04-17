@@ -20,8 +20,8 @@ const Profile = () => {
               {/* Profile Image / Avatar */}
               <div className="relative -mt-16 flex justify-center sm:-mt-24 sm:justify-start">
                 <div className="h-32 w-32 overflow-hidden rounded-full border-4 border-white bg-white shadow-xl sm:h-48 sm:w-48">
-                  {user.profileImg ? (
-                    <img className="h-full w-full object-cover" src={user.profileImg} alt={user.firstname} />
+                  {user.profileImgKey ? (
+                    <img className="h-full w-full object-cover" src={user.profileImgKey} alt={user.firstname} />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-indigo-50 text-indigo-200">
                       <CgProfile className="h-24 w-24 sm:h-32 sm:w-32" />

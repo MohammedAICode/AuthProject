@@ -10,6 +10,7 @@ import {
   convertRole,
   generateAccToken,
   generateRefToken,
+  generateVerifyToken,
   hashPassword,
   hashToken,
 } from "../../common/utils/utils";
@@ -18,6 +19,8 @@ import { prisma } from "../../lib/prisma";
 import { customPayload } from "../../middleware/authenticate";
 import { userExists } from "../User/user.service";
 import { ReqUser } from "../../common/types/express";
+import { redisClient } from "../../lib/redis";
+import { getProfileImageUrl } from "../Bucket/s3.service";
 
 export async function loginUser(user: {
   email: string;
@@ -323,7 +326,7 @@ export async function meDetails(
     },
     omit: {
       password: true,
-      id: true,
+      // id: true,
     },
   });
 
@@ -332,8 +335,28 @@ export async function meDetails(
     throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
   }
 
+  if (user?.profileImgKey) {
+    logger.info(
+      `[GET USER] Generating signed URL for profile image - userId: ${user.id}, key: ${user.profileImgKey}`,
+    );
+    try {
+      let url = await getProfileImageUrl(user.profileImgKey);
+      user.profileImgKey = url;
+      logger.info(
+        `[GET USER] Profile image URL generated successfully - userId: ${user.id}`,
+      );
+    } catch (err: any) {
+      logger.error(
+        `[GET USER] Failed to generate signed URL - userId: ${user.id}, error: ${err.message}`,
+      );
+      // Return user without profile image URL instead of failing
+      user.profileImgKey = null;
+    }
+  }
+  const { id, ...safeUser } = user;
+
   logger.info(`[ME] Successfully retrieved details for user ${userId}`);
-  return user;
+  return safeUser;
 }
 
 export async function resetPassword(
@@ -398,4 +421,33 @@ export async function resetPassword(
 
   logger.info(`[PASSWORD_RESET] Password reset completed for user ${user.id}`);
   return updatedUser;
+}
+
+export async function verifyUserEmail(user: User) {
+  // Check
+  if (user.isActive) {
+    logger.error(
+      `[VERIFY_OTP] user is already active, trying to activate again.`,
+    );
+    throw new AppError(ERROR_MESSAGES.INVALID_REQUEST, HTTP_STATUS.BAD_REQUEST);
+  }
+
+  let token = await generateVerifyToken(user);
+
+  await redisClient.del(user.id);
+
+  return await token;
+}
+
+export async function updatePass(user: User, newPassword: string) {
+  let updatedResult = await prisma.user.update({
+    where: {
+      email: user.email,
+    },
+    data: {
+      password: await hashPassword(newPassword),
+    },
+  });
+
+  return updatedResult;
 }

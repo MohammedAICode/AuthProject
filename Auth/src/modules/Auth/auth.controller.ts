@@ -10,6 +10,8 @@ import {
   logoutUser,
   meDetails,
   resetPassword,
+  updatePass,
+  verifyUserEmail,
 } from "./auth.service";
 import { logger } from "../../lib/logger";
 import { AppError } from "../../common/errors/AppError";
@@ -17,6 +19,7 @@ import { ReqUser } from "../../common/types/express";
 import { userExists } from "../User/user.service";
 import { eventBus } from "../../lib/eventBut";
 import { EVENT_CONSTANTS } from "../../common/EventListener/Listener";
+import { error } from "node:console";
 // import { sendEmail } from "../../lib/simpleEmailService";
 
 export async function login(req: Request, res: Response) {
@@ -233,6 +236,115 @@ export async function forgetPassword(req: Request, res: Response) {
       data: null,
       message: USER_MESSAGES.USER_FORGET_SUCCESS,
     });
+  } catch (err: any) {
+    return res
+      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json({
+        error: true,
+        data: null,
+        message: USER_MESSAGES.USER_FORGET_FAILED,
+      });
+  }
+}
+
+// method which get the user. through user Exists.
+// then verify the otp. from the redis.
+// if matches. generate a short term-jwt token for 10 min to setup the password
+
+export async function verifyOTP(req: Request, res: Response) {
+  logger.info(
+    `[VERIFY_OTP] Request to verify the user with email: ${req.query.email}, otp:${req.query.otp} `,
+  );
+  try {
+    const { email, otp } = req.query;
+
+    if (!email || !otp) {
+      if (!email) logger.error(`[VERIFY_OTP] No email was provided to verify`);
+
+      if (!otp) logger.error(`[VEIRFY_OTP] No OTP was provided to verify`);
+
+      throw new AppError(
+        ERROR_MESSAGES.INVALID_REQUEST,
+        HTTP_STATUS.BAD_REQUEST,
+      );
+    }
+
+    const result = await userExists(email as string, null, null);
+
+    if (!result) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        error: true,
+        data: null,
+        message: "user not found in the db",
+      });
+    }
+
+    let key = await verifyUserEmail(result);
+
+    res.cookie("verify", key, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    return res.status(HTTP_STATUS.OK).json({
+      error: false,
+      data: null,
+      message: "User verify successfully",
+    });
+  } catch (err: any) {
+    return res
+      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json({
+        error: true,
+        data: null,
+        message: USER_MESSAGES.USER_FORGET_FAILED,
+      });
+  }
+}
+ 
+export async function updatePassword(req: Request, res: Response) {
+  try {
+    const { password, confirmPassword } = req.body;
+    let currUser = req.user;
+
+    if (!currUser) {
+      logger.error(`[UPDATE_PASSWORD] current user not found.`);
+      throw new AppError(
+        ERROR_MESSAGES.USER_NOT_FOUND,
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    if (password !== confirmPassword) {
+      logger.error(
+        `[UPDATE_PASSWORD] password and confirm password. are not matched!`,
+      );
+      throw new AppError(
+        ERROR_MESSAGES.INVALID_REQUEST,
+        HTTP_STATUS.BAD_REQUEST,
+      );
+    }
+
+    let userResult = await userExists(currUser.email, null, null);
+
+    if (!userResult) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        error: true,
+        data: null,
+        message: "user not found in the db",
+      });
+    }
+
+    let result = await updatePass(userResult, password);
+
+    return res.status(HTTP_STATUS.OK).json({
+      error: false,
+      data: result.email,
+      message: USER_MESSAGES.USER_UPDATE_SUCCESS
+    })
+
   } catch (err: any) {
     return res
       .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)

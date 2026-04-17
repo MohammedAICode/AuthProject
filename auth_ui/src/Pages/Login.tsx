@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { loginUser, type apiResponse } from "../services/authService";
+import {
+  forgetPass,
+  loginUser,
+  type apiResponse,
+} from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
-
-export interface userLoginInfo {
-  email: string | "";
-  password: string | "";
-}
+import type { userLoginInfo } from "../utils/utils";
 
 export default function Login() {
   let [LoginInfo, setLoginInfo] = useState<userLoginInfo>({
@@ -53,14 +53,17 @@ export default function Login() {
     }
   };
 
-  const handleForget = () => {
+  const handleForget = async () => {
     if (!LoginInfo.email) {
       setIsError("Username cannot be empty!");
       return;
     }
 
-    
+    let response = await forgetPass(LoginInfo.email);
 
+    if (!response.err) {
+      navigate(`/verify?email=${LoginInfo.email}`);
+    }
   };
 
   return (
@@ -96,7 +99,7 @@ export default function Login() {
             type={showPass ? "password" : "text"}
             placeholder="Enter password"
             className="w-full border border-gray-300 focus:border-secondary focus:ring-1 focus:ring-secondary outline-none p-2.5 rounded-lg transition-all pr-10"
-            value={LoginInfo.password}
+            value={LoginInfo.password.toString()}
             name="password"
             onChange={handleChange}
           />

@@ -12,6 +12,19 @@ export interface User {
   username: string | null;
 }
 
+export interface userSignupInfo {
+  firstname: string;
+  lastname: string;
+  email: string;
+  username: string;
+  profileImg: File | null;
+}
+
+export interface userLoginInfo {
+  email: string;
+  password: String;
+}
+
 export function convertJsonToUserObj(userJson: any): User {
   if (!userJson) {
     throw new Error("user json does not have values.");

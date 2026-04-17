@@ -4,7 +4,8 @@ import { sendEmail } from "../../modules/Email/email.service";
 import { loadTemplate } from "../../modules/Email/template.util";
 import { logger } from "../../lib/logger";
 import { EMAIL_MESSAGES } from "../constant/constants";
-import { generateOTP } from "../utils/utils";
+import { buildOtpDigitsHtml, generateOTP } from "../utils/utils";
+import { redisClient } from "../../lib/redis";
 
 export const EVENT_CONSTANTS = {
   USER_CREATE: "user-create",
@@ -20,10 +21,19 @@ async function sendActivationMail(user: Omit<User, "password">) {
       `[EVENT USER_CREATE] Processing activation email - userId: ${user.id}, email: ${user.email}`,
     );
 
-    const activationLink = `${process.env.APP_URL || "http://localhost:4000"}/api/v1/auth/activate/${user.id}`;
+    const otp = generateOTP();
+
+    const link = `${process.env.UIOrigin || "http://localhost:4000"}/verify?email=${user.email}&otp=${otp}`;
 
     let body = loadTemplate("activation.html", {
-      activation_link: activationLink,
+      NAME: user.firstname + " " + user.lastname,
+      OTP_DIGITS_HTML: buildOtpDigitsHtml(otp),
+      EXPIRY_MINUTES: "10",
+      ACTIVATION_LINK: link,
+    });
+
+    redisClient.set(user.id, otp, {
+      EX: 10,
     });
 
     await sendEmail({
@@ -50,11 +60,17 @@ async function sendForgetPasswordMail(user: Omit<User, "password">) {
 
     const otp = generateOTP();
 
-    const forgetLink = `${process.env.UIOrigin || "http://localhost:4000"}/forget?email=${user.email}&otp=${otp}`;
+    const link = `${process.env.UIOrigin || "http://localhost:4000"}/verify?email=${user.email}&otp=${otp}`;
 
     let body = loadTemplate("reset.html", {
-      reset_link: forgetLink,
-      otp: otp,
+      NAME: user.firstname + " " + user.lastname,
+      OTP_DIGITS_HTML: buildOtpDigitsHtml(otp),
+      EXPIRY_MINUTES: "10",
+      RESET_LINK: link,
+    });
+
+    redisClient.set(user.id, otp, {
+      EX: 10,
     });
 
     await sendEmail({

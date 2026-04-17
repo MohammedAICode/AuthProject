@@ -8,7 +8,7 @@ export const userRouter = Router();
 userRouter.post("/register", uploadProfileImage, register);
 
 // add middle-ware. so that only user with admin role can access these routes.
-userRouter.get("/:id", get);
-userRouter.get("/", authenticate ,getAll);
-userRouter.delete("/:id", remove);
-userRouter.put("/:id", uploadProfileImage, update);
+userRouter.get("/:id", authenticate, get);
+userRouter.get("/", authenticate, getAll);
+userRouter.delete("/:id", authenticate, remove);
+userRouter.put("/:id", uploadProfileImage, authenticate, update);

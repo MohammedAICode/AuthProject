@@ -35,10 +35,15 @@ export async function authenticate(
   try {
     let refToken = req.cookies.refreshToken;
     let accToken = req.cookies.accessToken;
+    let verifyToken = req.cookies.verify;
 
-    logger.info(
-      `[AUTHENTICATE] Tokens present - Access: ${!!accToken}, Refresh: ${!!refToken}`,
-    );
+    verifyToken
+      ? logger.info(
+          `[AUTHENTICATE] verify token is present in the cookies. verify: ${verifyToken}`,
+        )
+      : logger.info(
+          `[AUTHENTICATE] Tokens present - Access: ${!!accToken}, Refresh: ${!!refToken}`,
+        );
 
     let accKey = process.env.ACCESS_TOKEN_SECRET;
     let refKey = process.env.REFRESH_TOKEN_SECRET;
@@ -169,6 +174,19 @@ export async function authenticate(
       attactUserToRequest(decodeRef, req);
       next();
       return;
+    } else if (verifyToken) {
+      let decodeVerify: customPayload = jwt.verify(
+        verifyToken,
+        accKey,
+      ) as customPayload;
+
+      const isVerify = req.headers["x-auth-verify"];
+      if (!isVerify) {
+        throw new AppError(ERROR_MESSAGES.FORBIDDEN, HTTP_STATUS.FORBIDDEN);
+      }
+
+      attactUserToRequest(decodeVerify, req);
+      next();
     } else {
       logger.error(`[AUTHENTICATE] No valid tokens provided`);
       throw new AppError(ERROR_MESSAGES.UNAUTHORIZED, HTTP_STATUS.UNAUTHORIZED);

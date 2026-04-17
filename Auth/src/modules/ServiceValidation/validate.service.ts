@@ -5,6 +5,8 @@ import { prisma } from "../../lib/prisma";
 import { S3 } from "../../lib/s3";
 import { ses } from "../../lib/ses";
 import { GetSendQuotaCommand } from "@aws-sdk/client-ses";
+import { redisClient } from "../../lib/redis";
+import { HTTP_STATUS } from "../../common/constant/constants";
 
 export async function validateServices(): Promise<void> {
   logger.info(
@@ -14,6 +16,7 @@ export async function validateServices(): Promise<void> {
     validateDb(),
     validateS3(),
     validateSES(),
+    validateRedis(),
   ]);
   let hasFailures = false;
   results.forEach((result, index) => {
@@ -26,7 +29,7 @@ export async function validateServices(): Promise<void> {
     }
   });
   if (hasFailures) {
-    throw new Error(
+    throw new AppError(
       "One or more services failed validation. Check logs for details.",
     );
   }
@@ -41,13 +44,15 @@ async function validateDb(): Promise<void> {
     logger.info(`[DB VALIDATION] Database connection validated successfully`);
   } catch (err: any) {
     logger.error(`[DB VALIDATION] Database connection failed: ${err.message}`);
-    throw new Error(`Database connection failed: ${err.message}`);
+    throw new AppError(`Database connection failed: ${err.message}`);
   }
 }
 
 async function validateS3(): Promise<void> {
   try {
-    logger.info(`[S3 VALIDATION] Checking bucket access - bucket: ${process.env.AWS_S3_BUCKET}`);
+    logger.info(
+      `[S3 VALIDATION] Checking bucket access - bucket: ${process.env.AWS_S3_BUCKET}`,
+    );
 
     await S3.send(
       new HeadBucketCommand({
@@ -60,15 +65,15 @@ async function validateS3(): Promise<void> {
     logger.error(`[S3 VALIDATION] Bucket validation failed: ${err.message}`);
 
     if (err.name === "NotFound") {
-      throw new Error(
+      throw new AppError(
         `S3 bucket '${process.env.AWS_S3_BUCKET}' does not exist`,
       );
     } else if (err.name === "Forbidden") {
-      throw new Error(
+      throw new AppError(
         `No permission to access S3 bucket '${process.env.AWS_S3_BUCKET}'`,
       );
     } else {
-      throw new Error(`S3 validation failed: ${err.message}`);
+      throw new AppError(`S3 validation failed: ${err.message}`);
     }
   }
 }
@@ -82,6 +87,30 @@ async function validateSES(): Promise<void> {
     logger.info(`[SES VALIDATION] SES access validated successfully`);
   } catch (err: any) {
     logger.error(`[SES VALIDATION] SES access failed: ${err.message}`);
-    throw new Error(`SES validation failed: ${err.message}`);
+    throw new AppError(`SES validation failed: ${err.message}`);
+  }
+}
+
+async function validateRedis(): Promise<void> {
+  try {
+    logger.info(`[REDIS VALIDATION] Checking redis access...`);
+    await redisClient.connect();
+
+    redisClient.on("connect", () => {
+      logger.info(` REDIS access validated successfully`);
+    });
+
+    redisClient.on("error", (err) => {
+      logger.error(`[REDIS VALIDATION] Redis failed to connect ${err.message}`);
+      throw new AppError(err, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    });
+
+    logger.info(`[REDIS VALIDATION] redis access validated successfully`);
+  } catch (err: any) {
+    logger.error(`[REDIS VALIDATION] redis access failed: ${err.message}`);
+    throw new AppError( 
+      `REDIS validation failed: ${err.message}`,
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    );
   }
 }

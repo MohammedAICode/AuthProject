@@ -1,23 +1,154 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <style>
-        .wrapper { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 8px; }
-        .header { text-align: center; color: #333; }
-        .btn { display: block; width: 200px; margin: 30px auto; padding: 15px; background-color: #007bff; color: #ffffff !important; text-decoration: none; border-radius: 5px; text-align: center; font-weight: bold; }
-        .footer { text-align: center; font-size: 12px; color: #777; margin-top: 20px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Activate Your Account</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: #f0ebf8; font-family: 'Segoe UI', Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    .otp-digit {
+      display: inline-block;
+      background: #ffffff;
+      border: 1.5px solid #d4a8f5;
+      border-radius: 10px;
+      width: 56px;
+      height: 64px;
+      line-height: 64px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: #892cdc;
+      margin: 0 5px;
+    }
+  </style>
 </head>
 <body>
-    <div class="wrapper">
-        <div class="container">
-            <h2 class="header">Welcome to Auth!</h2>
-            <p>Thank you for signing up. To get started, please verify your email address by clicking the button below:</p>
-            <a href="{{activation_link}}" class="btn">Activate Account</a>
-            <p>If you did not create an account, you can safely ignore this email.</p>
-        </div>
-        <div class="footer">© 2026 Auth Inc. All rights reserved.</div>
-    </div>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0ebf8; padding:40px 20px;">
+    <tr>
+      <td align="center">
+
+        <!-- Card -->
+        <table width="640" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff; border-radius:16px; overflow:hidden; border:1px solid #e2d4f5;">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:#892cdc; padding:40px 48px;">
+              <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td valign="middle" style="padding-right:18px;">
+                    <div style="width:56px; height:56px; background:rgba(255,255,255,0.15); border-radius:12px; text-align:center; line-height:56px;">
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                          stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                  </td>
+                  <td valign="middle">
+                    <p style="color:#ffffff; font-size:24px; font-weight:600; margin:0 0 4px;">Activate your account</p>
+                    <p style="color:rgba(255,255,255,0.72); font-size:14px; margin:0;">You're one step away from getting started</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px 48px;">
+
+              <!-- Greeting -->
+              <p style="color:#333333; font-size:15px; line-height:1.75; margin:0 0 28px;">
+                Hi <strong style="color:#111111;">{{NAME}}</strong>,<br><br>
+                Thanks for signing up! To complete your registration, please use the one-time password below.
+                This code is valid for <strong style="color:#892cdc;">{{EXPIRY_MINUTES}} minutes</strong> and can only be used once.
+              </p>
+
+              <!-- OTP Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f2ff; border:1.5px dashed #c17fe8; border-radius:12px; margin-bottom:32px;">
+                <tr>
+                  <td align="center" style="padding:28px 24px;">
+                    <p style="color:#892cdc; font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; margin:0 0 16px; text-align:center;">Your one-time password</p>
+                    <div style="text-align:center; font-size:0;">
+                      {{OTP_DIGITS_HTML}}
+                    </div>
+                    <p style="color:#999999; font-size:13px; margin:16px 0 0; text-align:center;">Expires in {{EXPIRY_MINUTES}} minutes &middot; Do not share this code with anyone</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Divider -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+                <tr>
+                  <td style="border-bottom:1px solid #ede8f7;"></td>
+                  <td style="padding:0 14px; white-space:nowrap; color:#aaaaaa; font-size:13px; vertical-align:middle;">or activate via link</td>
+                  <td style="border-bottom:1px solid #ede8f7;"></td>
+                </tr>
+              </table>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:32px;">
+                <tr>
+                  <td align="center">
+                    <a href="{{ACTIVATION_LINK}}"
+                      style="display:inline-block; background:#892cdc; color:#ffffff; text-decoration:none; font-size:15px; font-weight:600; padding:15px 52px; border-radius:10px; letter-spacing:0.3px;">
+                      Activate my account
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Info Note -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+                <tr>
+                  <td width="4" bgcolor="#892cdc" style="background:#892cdc; border-radius:2px;">&nbsp;</td>
+                  <td style="padding:14px 16px; background:#fdf8ff; border-radius:0 8px 8px 0; font-size:13px; color:#666666; line-height:1.6;">
+                    This activation link will expire in <strong>24 hours</strong>. If you did not create an account with us,
+                    please ignore this email &mdash; no action is needed and your information is safe.
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Disclaimer -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="border-top:1px solid #f0ebf8; padding-top:20px; text-align:center;">
+                    <p style="color:#bbbbbb; font-size:12px; line-height:1.8;">
+                      For security, never share your OTP or activation link with anyone.<br>
+                      YourApp will never ask for your password via email.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td bgcolor="#fafafa" style="background:#fafafa; border-top:1px solid #ede8f7; padding:18px 48px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="color:#bbbbbb; font-size:12px;">&#169; 2026 YourApp Inc. All rights reserved.</td>
+                  <td align="right">
+                    <table cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="padding-left:20px;"><a href="#" style="color:#892cdc; font-size:12px; text-decoration:none;">Unsubscribe</a></td>
+                        <td style="padding-left:20px;"><a href="#" style="color:#892cdc; font-size:12px; text-decoration:none;">Privacy Policy</a></td>
+                        <td style="padding-left:20px;"><a href="#" style="color:#892cdc; font-size:12px; text-decoration:none;">Help Center</a></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+        <!-- /Card -->
+
+      </td>
+    </tr>
+  </table>
 </body>
 </html>

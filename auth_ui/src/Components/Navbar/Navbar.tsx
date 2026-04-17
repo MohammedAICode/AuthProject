@@ -70,27 +70,28 @@ function Navbar() {
                     <CgProfile className="text-lg" />
                     <span>Profile</span>
                   </button>
-                  <button
-                    className="flex w-full items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-indigo-600 transition-colors"
-                    onClick={() => {
-                      navigate("/profile");
-                      setShowMenu(false);
-                    }}
-                  >
-                    <FaUsers className="text-lg" />
-                    <span>Users</span>
-                  </button>
+
                   {user.role === "ADMIN" ? (
                     <button
-                      className="flex w-full items-center gap-3 px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50 transition-colors"
-                      onClick={handleLogout}
+                      className="flex w-full items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-indigo-600 transition-colors"
+                      onClick={() => {
+                        navigate("/profile");
+                        setShowMenu(false);
+                      }}
                     >
-                      <IoLogOutOutline className="text-lg" />
-                      <span>Logout</span>
+                      <FaUsers className="text-lg" />
+                      <span>Users</span>
                     </button>
                   ) : (
                     <></>
                   )}
+                  <button
+                    className="flex w-full items-center gap-3 px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                    onClick={handleLogout}
+                  >
+                    <IoLogOutOutline className="text-lg" />
+                    <span>Logout</span>
+                  </button>
                 </div>
               )}
             </div>

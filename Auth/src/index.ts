@@ -7,6 +7,7 @@ import { authRouter } from "./modules/Auth/auth.routes";
 import cookieParser from "cookie-parser";
 import { startServer } from "./common/utils/utils";
 import cors from "cors";
+import { redisClient } from "./lib/redis";
 
 const app = express();
 const origin = process.env.UIOrigin;
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 await startServer();
+await redisClient;
 
 const PORT = process.env.PORT || 4001;
 

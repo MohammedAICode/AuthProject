@@ -109,19 +109,19 @@ export async function registerUser(req: Request) {
     user.role = USER_ROLE.USER;
   }
 
-  // make the password field madatory. when the authProvider is LOCAL.
-  if (!password) {
-    logger.warn(`[REGISTER] No password provided for email: ${email}`);
-    if (user.authProvider === AuthProvider.LOCAL) {
-      throw new AppError(
-        ERROR_MESSAGES.USER_PASSWORD_REQUIRED,
-        HTTP_STATUS.BAD_REQUEST,
-      );
-    }
-  } else {
-    user.password = await hashPassword(password);
-    logger.info(`[REGISTER] Password hashed successfully`);
-  }
+  // // make the password field madatory. when the authProvider is LOCAL.
+  // if (!password) {
+  //   logger.warn(`[REGISTER] No password provided for email: ${email}`);
+  //   if (user.authProvider === AuthProvider.LOCAL) {
+  //     throw new AppError(
+  //       ERROR_MESSAGES.USER_PASSWORD_REQUIRED,
+  //       HTTP_STATUS.BAD_REQUEST,
+  //     );
+  //   }
+  // } else {
+  //   user.password = await hashPassword(password);
+  //   logger.info(`[REGISTER] Password hashed successfully`);
+  // }
 
   let result = await prisma.user.create({
     data: user,

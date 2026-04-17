@@ -1,31 +1,23 @@
 import React, { useState } from "react";
-import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-
-export interface userSignupInfo {
-  firstname: string;
-  lastname: string;
-  email: string;
-  username: string;
-  password: string;
-  profileImg: File | null;
-}
+import type { userSignupInfo } from "../utils/utils";
+import { signupUser } from "../services/authService";
 
 function Signup() {
   let navigate = useNavigate();
-  let [showPass, setShowPass] = useState<boolean>(true);
+  let [isError, setIsError] = useState<string | null>(null);
+
   let [signupInfo, setSignupInfo] = useState<userSignupInfo>({
     firstname: "",
     lastname: "",
     email: "",
     username: "",
-    password: "",
     profileImg: null,
   });
 
   let handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log(
-      `e.target.name == "profileImg" ${e.target.name == "profileImg"}`
+      `e.target.name == "profileImg" ${e.target.name == "profileImg"}`,
     );
 
     if (e.target.name == "profileImg" && e.target.files) {
@@ -41,21 +33,46 @@ function Signup() {
     }
   };
 
-  let handleSubmit = () => {
+  let handleSubmit = async () => {
     console.log(`Signup Info :: ${JSON.stringify(signupInfo)}`);
+
+    // Add zod formatting here..
+    if (!signupInfo.firstname) {
+      setIsError("First name is required.");
+      return;
+    }
+    if (!signupInfo.lastname) {
+      setIsError("Last name is required.");
+      return;
+    }
+    if (!signupInfo.email) {
+      setIsError("Email is required");
+      return;
+    }
+
+    let response = await signupUser(signupInfo);
+
+    if (!response.err) {
+      navigate(`/verify?email=${signupInfo.email}`);
+    }
+
+    setIsError(response.message || "Internal Server Error");
+    return;
   };
 
   return (
     <div className="h-screen flex justify-center items-center bg-linear-to-br from-gray-100 to-gray-200">
-
       <div className="w-105 bg-white p-8 rounded-2xl shadow-lg flex flex-col gap-4">
-
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-800">Create Account</h2>
-          <p className="text-gray-500 text-sm mt-1">
-            Sign up to get started
-          </p>
+          <p className="text-gray-500 text-sm mt-1">Sign up to get started</p>
         </div>
+
+        {isError && (
+          <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-2 rounded-md">
+            {isError}
+          </div>
+        )}
 
         {/* First + Last name */}
         <div className="flex gap-3">
@@ -65,7 +82,7 @@ function Signup() {
               type="text"
               name="firstname"
               placeholder="John"
-              value={signupInfo.firstname}
+              value={signupInfo.firstname!}
               onChange={handleChange}
               className="border border-gray-300 focus:border-secondary focus:ring-1 focus:ring-secondary outline-none p-2.5 rounded-lg transition-all"
             />
@@ -77,7 +94,7 @@ function Signup() {
               type="text"
               name="lastname"
               placeholder="Doe"
-              value={signupInfo.lastname}
+              value={signupInfo.lastname!}
               onChange={handleChange}
               className="border border-gray-300 focus:border-secondary focus:ring-1 focus:ring-secondary outline-none p-2.5 rounded-lg transition-all"
             />
@@ -91,7 +108,7 @@ function Signup() {
             type="email"
             name="email"
             placeholder="example@email.com"
-            value={signupInfo.email}
+            value={signupInfo.email!}
             onChange={handleChange}
             className="border border-gray-300 focus:border-secondary focus:ring-1 focus:ring-secondary outline-none p-2.5 rounded-lg transition-all"
           />
@@ -104,31 +121,10 @@ function Signup() {
             type="text"
             name="username"
             placeholder="choose username"
-            value={signupInfo.username}
+            value={signupInfo.username!}
             onChange={handleChange}
             className="border border-gray-300 focus:border-secondary focus:ring-1 focus:ring-secondary outline-none p-2.5 rounded-lg transition-all"
           />
-        </div>
-
-        {/* Password */}
-        <div className="flex flex-col gap-1 relative">
-          <label className="text-sm text-gray-600">Password</label>
-
-          <input
-            type={showPass ? "password" : "text"}
-            name="password"
-            placeholder="create password"
-            value={signupInfo.password}
-            onChange={handleChange}
-            className="border border-gray-300 focus:border-secondary focus:ring-1 focus:ring-secondary outline-none p-2.5 rounded-lg transition-all pr-10"
-          />
-
-          <aside
-            className="absolute right-3 top-9.5 text-gray-500 cursor-pointer hover:text-gray-700"
-            onClick={() => setShowPass(!showPass)}
-          >
-            {showPass ? <FaRegEye /> : <FaRegEyeSlash />}
-          </aside>
         </div>
 
         {/* File Upload */}
@@ -162,9 +158,7 @@ function Signup() {
             Login
           </span>
         </p>
-
       </div>
-
     </div>
   );
 }

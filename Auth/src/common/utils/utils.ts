@@ -133,6 +133,44 @@ export async function generateRefToken(user: User | Prisma.UserCreateInput) {
   }
 }
 
+export async function generateVerifyToken(user: User | Prisma.UserCreateInput, ) {
+  // this access token should contain the refresh token Id. so that we will have the refresh token as well as the id.
+  // while checking we can find the refresh token by Id. then compare the encrypted token with raw token.
+  // then check the expiration | revoked thing
+
+  try {
+    let payload: {} = {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      authProvider: user.authProvider,
+      type: "VERIFY",
+    };
+
+    let key = process.env.ACCESS_TOKEN_SECRET;
+    let duration = process.env.ACCESS_TOKEN_EXPIRY;
+
+    if (!key || !duration) {
+      logger.error(`Unable to access the environment variables. key: ${key}`);
+      throw new AppError(
+        ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    let result = jwt.sign(payload, key, {
+      expiresIn: duration as SignOptions["expiresIn"],
+    });
+
+    return result;
+  } catch (err: any) {
+    throw new AppError(
+      err.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
 export function convertRole(role: string): USER_ROLE {
   if (role === USER_ROLE.ADMIN.toString()) {
     return USER_ROLE.ADMIN;
@@ -153,4 +191,14 @@ export function generateOTP() {
   return crypto.randomInt(100000, 1000000).toString();
 }
 
+
+export function buildOtpDigitsHtml(otp: string): string {
+  return otp
+    .split("")
+    .map(
+      (digit) =>
+        `<div class="otp-digit">${digit}</div>`
+    )
+    .join("");
+}
 
