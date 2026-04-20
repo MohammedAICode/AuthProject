@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import {
   AUTH_MESSAGES,
   ERROR_MESSAGES,
@@ -10,6 +10,7 @@ import {
   logoutUser,
   meDetails,
   resetPassword,
+  storeRefreshToken,
   updatePass,
   verifyUserEmail,
 } from "./auth.service";
@@ -17,9 +18,11 @@ import { logger } from "../../lib/logger";
 import { AppError } from "../../common/errors/AppError";
 import { ReqUser } from "../../common/types/express";
 import { userExists } from "../User/user.service";
-import { eventBus } from "../../lib/eventBut";
+import { eventBus } from "../../lib/eventBus";
 import { EVENT_CONSTANTS } from "../../common/EventListener/Listener";
 import { error } from "node:console";
+import passport from "passport";
+import { generateAccToken, generateRefToken } from "../../common/utils/utils";
 // import { sendEmail } from "../../lib/simpleEmailService";
 
 export async function login(req: Request, res: Response) {
@@ -98,7 +101,7 @@ export async function logout(req: Request, res: Response) {
     // remove from the cookies
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
-    logger.info(`[LOGOUT] removed the tokens. logout successfull.`);
+    logger.info(`[LOGOUT] removed the tokens. logout successful.`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
       data: user.email,
@@ -138,6 +141,10 @@ export async function me(req: Request, res: Response) {
       );
     }
 
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate",
+    );
     logger.info(`[ME] User found successfully returning in the response.`);
     res.status(HTTP_STATUS.OK).json({
       error: false,
@@ -303,7 +310,7 @@ export async function verifyOTP(req: Request, res: Response) {
       });
   }
 }
- 
+
 export async function updatePassword(req: Request, res: Response) {
   try {
     const { password, confirmPassword } = req.body;
@@ -339,12 +346,13 @@ export async function updatePassword(req: Request, res: Response) {
 
     let result = await updatePass(userResult, password);
 
+    res.clearCookie("verify");
+
     return res.status(HTTP_STATUS.OK).json({
       error: false,
       data: result.email,
-      message: USER_MESSAGES.USER_UPDATE_SUCCESS
-    })
-
+      message: USER_MESSAGES.USER_UPDATE_SUCCESS,
+    });
   } catch (err: any) {
     return res
       .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
@@ -354,4 +362,38 @@ export async function updatePassword(req: Request, res: Response) {
         message: USER_MESSAGES.USER_FORGET_FAILED,
       });
   }
+}
+
+export const googleAuth = passport.authenticate("google", {
+  scope: ["profile", "email"],
+});
+
+export function googleCallBack(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  passport.authenticate("google", { session: false }, async (error, user) => {
+    if (error || !user)
+      return res.redirect(`${process.env.UIOrigin}/login?error=failed`);
+
+    const refToken = await generateRefToken(user);
+    const { id } = await storeRefreshToken(refToken, user);
+    const accToken = await generateAccToken(user, id!);
+
+    // Set the same cookies your app uses for auth
+    res.cookie("accessToken", accToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+    res.cookie("refreshToken", refToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    res.redirect(`${process.env.UIOrigin}/`); // Send user back to front-end
+  })(req, res, next);
 }

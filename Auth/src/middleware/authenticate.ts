@@ -95,7 +95,7 @@ export async function authenticate(
         logger.info(
           `[AUTHENTICATE] Authentication successful for user ${decodeAcc.userId}`,
         );
-        attactUserToRequest(decodeAcc, req);
+        attachUserToRequest(decodeAcc, req);
         next();
         return;
       } catch (err: any) {
@@ -126,7 +126,7 @@ export async function authenticate(
           logger.info(
             `[AUTHENTICATE] Token rotation successful for user ${decodeRef.userId}`,
           );
-          attactUserToRequest(decodeRef, req);
+          attachUserToRequest(decodeRef, req);
           next();
           return;
         } else {
@@ -171,7 +171,7 @@ export async function authenticate(
       logger.info(
         `[AUTHENTICATE] New tokens issued for user ${decodeRef.userId}`,
       );
-      attactUserToRequest(decodeRef, req);
+      attachUserToRequest(decodeRef, req);
       next();
       return;
     } else if (verifyToken) {
@@ -185,7 +185,7 @@ export async function authenticate(
         throw new AppError(ERROR_MESSAGES.FORBIDDEN, HTTP_STATUS.FORBIDDEN);
       }
 
-      attactUserToRequest(decodeVerify, req);
+      attachUserToRequest(decodeVerify, req);
       next();
     } else {
       logger.error(`[AUTHENTICATE] No valid tokens provided`);
@@ -216,7 +216,7 @@ export async function authenticate(
 // exp =1774434578
 // iat =1774433678
 
-function attactUserToRequest(userDetails: customPayload, req: Request) {
+function attachUserToRequest(userDetails: customPayload, req: Request) {
   // if (!req.user) {
   //   throw new AppError(`No user object found.`);
   // }

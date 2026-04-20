@@ -66,6 +66,10 @@ export default function Login() {
     }
   };
 
+  async function handleGoogleLogin() {
+    window.location.href = import.meta.env.VITE_API_GOOGLE_REDIRECT;
+  }
+
   return (
     <div className="h-screen flex justify-center items-center bg-linear-to-br from-gray-100 to-gray-200">
       <div className="w-96 bg-white p-8 rounded-2xl shadow-lg flex flex-col gap-4">
@@ -124,6 +128,19 @@ export default function Login() {
           onClick={handleSubmit}
         >
           Login
+        </button>
+
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          className="w-full flex items-center justify-center gap-2 border border-gray-300 py-2.5 rounded-lg hover:bg-gray-50 transition-all font-medium mt-2"
+        >
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="Google"
+            className="w-5 h-5"
+          />
+          Continue with Google
         </button>
 
         <p className="text-sm text-center text-gray-600">

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
 import { IoLogOutOutline } from "react-icons/io5";
 import { FaUsers } from "react-icons/fa6";
+import Loader from "../Loader/Loader";
 
 function Navbar() {
   const { user, loading, setUser } = useAuth();
@@ -46,7 +47,9 @@ function Navbar() {
           Auth System
         </button>
         <div className="flex items-center gap-4">
-          {!loading && user ? (
+          {loading ? (
+             <Loader size="sm" />
+          ) : user ? (
             <div className="relative">
               <section
                 onClick={() => setShowMenu(!showMenu)}
@@ -96,13 +99,12 @@ function Navbar() {
               )}
             </div>
           ) : (
-            !loading && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-400">
-                  Loading...
-                </span>
-              </div>
-            )
+            <button
+               onClick={() => navigate("/login")}
+               className="text-sm font-medium text-secondary hover:underline"
+            >
+              Login
+            </button>
           )}
         </div>
       </div>

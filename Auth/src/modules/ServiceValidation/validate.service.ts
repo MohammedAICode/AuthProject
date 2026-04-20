@@ -22,7 +22,7 @@ export async function validateServices(): Promise<void> {
   results.forEach((result, index) => {
     if (result.status === "rejected") {
       hasFailures = true;
-      const serviceName = ["Database", "S3", "SES"][index];
+      const serviceName = ["Database", "S3", "SES", "Redis"][index];
       logger.error(
         `[SERVICE VALIDATION] ${serviceName} validation failed: ${result.reason}`,
       );

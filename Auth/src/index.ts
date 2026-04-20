@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import { startServer } from "./common/utils/utils";
 import cors from "cors";
 import { redisClient } from "./lib/redis";
+import passport from "./lib/oAuth";
 
 const app = express();
 const origin = process.env.UIOrigin;
@@ -19,6 +20,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+app.use(passport.initialize());
 
 await startServer();
 await redisClient;

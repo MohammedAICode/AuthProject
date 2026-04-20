@@ -1,5 +1,5 @@
 import { User } from "../../../generated/prisma/client";
-import { eventBus } from "../../lib/eventBut";
+import { eventBus } from "../../lib/eventBus";
 import { sendEmail } from "../../modules/Email/email.service";
 import { loadTemplate } from "../../modules/Email/template.util";
 import { logger } from "../../lib/logger";
@@ -33,7 +33,7 @@ async function sendActivationMail(user: Omit<User, "password">) {
     });
 
     redisClient.set(user.id, otp, {
-      EX: 10,
+      EX: 10 * 60 ,
     });
 
     await sendEmail({
@@ -70,7 +70,7 @@ async function sendForgetPasswordMail(user: Omit<User, "password">) {
     });
 
     redisClient.set(user.id, otp, {
-      EX: 10,
+      EX: 10 * 60,
     });
 
     await sendEmail({

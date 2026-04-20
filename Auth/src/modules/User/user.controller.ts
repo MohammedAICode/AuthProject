@@ -14,7 +14,7 @@ import {
 } from "../../common/constant/constants";
 import { logger } from "../../lib/logger";
 import { AppError } from "../../common/errors/AppError";
-import { eventBus } from "../../lib/eventBut";
+import { eventBus } from "../../lib/eventBus";
 import { EVENT_CONSTANTS } from "../../common/EventListener/Listener";
 
 export async function register(req: Request, res: Response) {
@@ -37,7 +37,7 @@ export async function register(req: Request, res: Response) {
     setImmediate(() => {
       eventBus.emit(EVENT_CONSTANTS.USER_CREATE, result);
     });
-    
+
     return res.status(HTTP_STATUS.CREATED).json({
       error: false,
       data: result.email,
@@ -74,8 +74,8 @@ export async function get(req: Request, res: Response) {
 
     result != null
       ? logger.info(
-          `[GET USER] User found sucessfully. id: ${result.id} & email: ${result.email}`,
-        )
+        `[GET USER] User found sucessfully. id: ${result.id} & email: ${result.email}`,
+      )
       : logger.info(`[GET USER] User not found, result : ${result}`);
 
     return res.status(HTTP_STATUS.OK).json({
@@ -119,8 +119,8 @@ export async function getAll(req: Request, res: Response) {
 
     users != null
       ? logger.info(
-          `[GET USERS] User found sucessfully. numfound : ${users.length}`,
-        )
+        `[GET USERS] User found sucessfully. numfound : ${users.length}`,
+      )
       : logger.info(`[GET USERS] User not found, result : ${users}`);
 
     return res.status(HTTP_STATUS.OK).json({
@@ -158,7 +158,7 @@ export async function remove(req: Request, res: Response) {
         message: ERROR_MESSAGES.USER_ID_MISSING,
       });
     }
-    let exists = await userExists("", "",id as string);
+    let exists = await userExists("", "", id as string);
     if (!exists) {
       throw new AppError(
         ERROR_MESSAGES.USER_ID_MISSING,

@@ -147,8 +147,8 @@ export async function generateVerifyToken(user: User | Prisma.UserCreateInput, )
       type: "VERIFY",
     };
 
-    let key = process.env.ACCESS_TOKEN_SECRET;
-    let duration = process.env.ACCESS_TOKEN_EXPIRY;
+    let key = process.env.VERIFY_TOKEN_SECRET;
+    let duration = process.env.VERIFY_TOKEN_EXPIRY;
 
     if (!key || !duration) {
       logger.error(`Unable to access the environment variables. key: ${key}`);

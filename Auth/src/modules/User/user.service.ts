@@ -1,6 +1,5 @@
 import { Request } from "express";
 import { prisma } from "../../lib/prisma";
-import brcrypt from "bcrypt";
 import {
   ERROR_MESSAGES,
   HTTP_STATUS,
@@ -22,8 +21,7 @@ import {
 import { v4 as uuid } from "uuid";
 
 export async function registerUser(req: Request) {
-  let { firstname, lastname, email, username, password, authProvider, role } =
-    req.body;
+  let { firstname, lastname, email, username, authProvider, role } = req.body;
 
   let userId = uuid();
 
@@ -123,18 +121,22 @@ export async function registerUser(req: Request) {
   //   logger.info(`[REGISTER] Password hashed successfully`);
   // }
 
-  let result = await prisma.user.create({
-    data: user,
-    omit: {
-      password: true,
-    },
-  });
+  const result = await createUserInDB(user);
 
   logger.info(
     `[REGISTER] User saved - id: ${result.id}, email: ${result.email}`,
   );
 
   return result;
+}
+
+export async function createUserInDB(user: Prisma.UserCreateInput) {
+  return await prisma.user.create({
+    data: user,
+    omit: {
+      password: true,
+    },
+  });
 }
 
 export async function userExists(
@@ -146,7 +148,7 @@ export async function userExists(
     let result = null;
 
     if (id) {
-      logger.info(`[User Exits] - Trying to find the user with id: ${id}`);
+      logger.info(`[User Exists] - Trying to find the user with id: ${id}`);
       result = await prisma.user.findUnique({
         where: {
           id,
@@ -154,7 +156,7 @@ export async function userExists(
       });
     } else if (email) {
       logger.info(
-        `[User Exits] - Trying to find the user with email: ${email}`,
+        `[User Exists] - Trying to find the user with email: ${email}`,
       );
       result = await prisma.user.findUnique({
         where: {

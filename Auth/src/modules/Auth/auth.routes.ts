@@ -11,6 +11,8 @@
 import { Router } from "express";
 import {
   forgetPassword,
+  googleAuth,
+  googleCallBack,
   login,
   logout,
   me,
@@ -30,3 +32,6 @@ authRouter.get("/forget-password", forgetPassword);
 
 authRouter.get("/verify", verifyOTP);
 authRouter.post("/forget", authenticate, updatePassword);
+
+authRouter.get("/google", googleAuth);
+authRouter.get("/google/callback", googleCallBack);
