@@ -37,13 +37,7 @@ export async function authenticate(
     const accToken = req.cookies.accessToken;
     const verifyToken = req.cookies.verify;
 
-    verifyToken
-      ? logger.info(
-        `[AUTHENTICATE] verify token is present in the cookies. verify: ${verifyToken}`,
-      )
-      : logger.info(
-        `[AUTHENTICATE] Tokens present - Access: ${!!accToken}, Refresh: ${!!refToken}`,
-      );
+    verifyToken ? logger.info(`[AUTHENTICATE] verify token is present in the cookies. verify: ${verifyToken}`,) : logger.info( `[AUTHENTICATE] Tokens present - Access: ${!!accToken}, Refresh: ${!!refToken}`, );
 
     const accKey = process.env.ACCESS_TOKEN_SECRET;
     const refKey = process.env.REFRESH_TOKEN_SECRET;
