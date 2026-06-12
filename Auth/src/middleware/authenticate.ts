@@ -39,11 +39,11 @@ export async function authenticate(
 
     verifyToken
       ? logger.info(
-          `[AUTHENTICATE] verify token is present in the cookies. verify: ${verifyToken}`,
-        )
+        `[AUTHENTICATE] verify token is present in the cookies. verify: ${verifyToken}`,
+      )
       : logger.info(
-          `[AUTHENTICATE] Tokens present - Access: ${!!accToken}, Refresh: ${!!refToken}`,
-        );
+        `[AUTHENTICATE] Tokens present - Access: ${!!accToken}, Refresh: ${!!refToken}`,
+      );
 
     let accKey = process.env.ACCESS_TOKEN_SECRET;
     let refKey = process.env.REFRESH_TOKEN_SECRET;
@@ -176,11 +176,11 @@ export async function authenticate(
       next();
       return;
     } else if (verifyToken) {
-      if(!verifyKey) {
+      if (!verifyKey) {
         throw new AppError(
-            ERROR_MESSAGES.INVALID_ENV,
-            HTTP_STATUS.INTERNAL_SERVER_ERROR,
-          );
+          ERROR_MESSAGES.INVALID_ENV,
+          HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        );
       }
       let decodeVerify: customPayload = jwt.verify(
         verifyToken,
