@@ -22,6 +22,12 @@ jobs:
       - name: Run Lint
         run: npm run lint
         working-directory: ./Auth
+
+      - name: Run Prisma Generate
+        run: npm run prisma:generate
+        working-directory: ./Auth
+        env:
+         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         
       - name: Run Build
         run: npm run build
