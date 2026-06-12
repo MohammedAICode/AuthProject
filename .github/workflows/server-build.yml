@@ -1,22 +1,22 @@
-name: Build on every PR
+name: Build on PR
 
 on:
   pull_request:
     branches:
-      -master
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: User Node.js
+      - name: Use Node.js
         uses: actions/setup-node@v3
-        with: 
-          node-version: '24'
-
-      - name: install Dependencies
+        with:
+          node-version: '22'
+      
+      - name: Install Dependencies
         run: npm install
-
+        
       - name: Run Build
         run: npm run build
