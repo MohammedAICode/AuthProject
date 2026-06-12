@@ -19,10 +19,10 @@ import { EVENT_CONSTANTS } from "../../common/EventListener/Listener";
 
 export async function register(req: Request, res: Response) {
   try {
-    const { password: _, ...safeBody } = req.body;
+    const { password: _password, ...safeBody } = req.body; // eslint-disable-line @typescript-eslint/no-unused-vars
 
     logger.info(`[REGISTER] Request received - ${JSON.stringify(safeBody)}`);
-    let exists = await userExists("", req.body.email, req.body.username);
+    const exists = await userExists("", req.body.email, req.body.username);
     if (exists) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         error: true,
@@ -60,7 +60,7 @@ export async function register(req: Request, res: Response) {
 export async function get(req: Request, res: Response) {
   logger.info(`[GET USER] Request to get the user with id: ${req.params.id}`);
   try {
-    let { id } = req.params; // use 'ZOD' to validate the id.
+    const { id } = req.params; // use 'ZOD' to validate the id.
     if (!id) {
       logger.error(`[GET USER] No id present in the requesting object`);
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -70,13 +70,15 @@ export async function get(req: Request, res: Response) {
       });
     }
 
-    let result = await getUser(id as string);
+    const result = await getUser(id as string);
 
-    result != null
-      ? logger.info(
+    if (result != null) {
+      logger.info(
         `[GET USER] User found sucessfully. id: ${result.id} & email: ${result.email}`,
-      )
-      : logger.info(`[GET USER] User not found, result : ${result}`);
+      );
+    } else {
+      logger.info(`[GET USER] User not found, result : ${result}`);
+    }
 
     return res.status(HTTP_STATUS.OK).json({
       error: false,
@@ -101,7 +103,7 @@ export async function getAll(req: Request, res: Response) {
   logger.info(`[GET USERS] Request to get all the users.`); // we need to log who is trying to access / view all the users details
   try {
     // handle the query parameters to handle pagination, search and simple filters.
-    let { search, page, size, isActive, role } = req.query;
+    const { search, page, size, isActive, role } = req.query;
 
     const filter = {
       search: search ? String(search) : undefined,
@@ -115,13 +117,15 @@ export async function getAll(req: Request, res: Response) {
       `[GET USERS] Finding the users with these filters: ${JSON.stringify(filter)}`,
     );
 
-    let { totalCount, filteredCount, users } = await getAllUsers(filter);
+    const { totalCount, filteredCount, users } = await getAllUsers(filter);
 
-    users != null
-      ? logger.info(
+    if (users != null) {
+      logger.info(
         `[GET USERS] User found sucessfully. numfound : ${users.length}`,
-      )
-      : logger.info(`[GET USERS] User not found, result : ${users}`);
+      );
+    } else {
+      logger.info(`[GET USERS] User not found, result : ${users}`);
+    }
 
     return res.status(HTTP_STATUS.OK).json({
       error: false,
@@ -149,7 +153,7 @@ export async function getAll(req: Request, res: Response) {
 export async function remove(req: Request, res: Response) {
   logger.info(`[USER DELETE] Request to delete the user. id: ${req.params.id}`);
   try {
-    let { id } = req.params;
+    const { id } = req.params;
 
     if (!id) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -158,7 +162,7 @@ export async function remove(req: Request, res: Response) {
         message: ERROR_MESSAGES.USER_ID_MISSING,
       });
     }
-    let exists = await userExists("", "", id as string);
+    const exists = await userExists("", "", id as string);
     if (!exists) {
       throw new AppError(
         ERROR_MESSAGES.USER_ID_MISSING,
@@ -166,7 +170,7 @@ export async function remove(req: Request, res: Response) {
       );
     }
 
-    let result = await deleteUser(id as string);
+    const result = await deleteUser(id as string);
 
     return res.status(HTTP_STATUS.OK).json({
       error: false,
@@ -192,16 +196,16 @@ export async function remove(req: Request, res: Response) {
 export async function update(req: Request, res: Response) {
   logger.info(`[USER UPDATE] Request to update the user. id: ${req.params.id}`);
   try {
-    let { id } = req.params;
+    const { id } = req.params;
 
-    let exists = await userExists("", "", id as string);
+    const exists = await userExists("", "", id as string);
     if (!exists) {
       throw new AppError(
         ERROR_MESSAGES.USER_ID_MISSING,
         HTTP_STATUS.BAD_REQUEST,
       );
     }
-    let result = await updateUser(id as string, req, exists.profileImgKey);
+    const result = await updateUser(id as string, req, exists.profileImgKey);
 
     return res.status(HTTP_STATUS.OK).json({
       error: false,

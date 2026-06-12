@@ -1,9 +1,7 @@
 import { Request } from "express";
 import { prisma } from "../../lib/prisma";
 import {
-  ERROR_MESSAGES,
   HTTP_STATUS,
-  USER_MESSAGES,
 } from "../../common/constant/constants";
 import { logger } from "../../lib/logger";
 import {
@@ -21,9 +19,9 @@ import {
 import { v4 as uuid } from "uuid";
 
 export async function registerUser(req: Request) {
-  let { firstname, lastname, email, username, authProvider, role } = req.body;
+  const { firstname, lastname, email, username, authProvider, role } = req.body;
 
-  let userId = uuid();
+  const userId = uuid();
 
   // req.file is populated by multer when the client sends a multipart/form-data request.
   // req.file.buffer contains the raw image bytes (because we use memoryStorage).
@@ -45,7 +43,7 @@ export async function registerUser(req: Request) {
     );
   }
 
-  let user: Prisma.UserCreateInput = {
+  const user: Prisma.UserCreateInput = {
     id: userId,
     firstname: firstname,
     email: email,
@@ -56,7 +54,7 @@ export async function registerUser(req: Request) {
       `[REGISTER] Profile image detected - initiating S3 upload for userId: ${userId}`,
     );
     try {
-      let key = await uploadProfileImgToS3(profileImg, userId);
+      const key = await uploadProfileImgToS3(profileImg, userId);
       user.profileImgKey = key;
       logger.info(
         `[REGISTER] Profile image uploaded to S3 successfully - userId: ${userId}, key: ${key}`,
@@ -144,48 +142,44 @@ export async function userExists(
   username: string | null,
   id: string | null,
 ) {
-  try {
-    let result = null;
+  let result = null;
 
-    if (id) {
-      logger.info(`[User Exists] - Trying to find the user with id: ${id}`);
-      result = await prisma.user.findUnique({
-        where: {
-          id,
-        },
-      });
-    } else if (email) {
-      logger.info(
-        `[User Exists] - Trying to find the user with email: ${email}`,
-      );
-      result = await prisma.user.findUnique({
-        where: {
-          email: email,
-        },
-      });
-    } else if (username) {
-      logger.info(
-        `[User Exists] - Trying to find the user with username: ${username}`,
-      );
-      result = await prisma.user.findUnique({
-        where: {
-          username: username,
-        },
-      });
-    }
-    // if (result) {
-    //   logger.error(
-    //     `[User Exists] - User already exits with this email / username - ${result.email} / ${result.username}`,
-    //   );
-    //   throw new AppError(
-    //     `User exists with email - ${result.email}`,
-    //     HTTP_STATUS.BAD_REQUEST,
-    //   );
-    // }
-    return result;
-  } catch (err: any) {
-    throw err;
+  if (id) {
+    logger.info(`[User Exists] - Trying to find the user with id: ${id}`);
+    result = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+  } else if (email) {
+    logger.info(
+      `[User Exists] - Trying to find the user with email: ${email}`,
+    );
+    result = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+  } else if (username) {
+    logger.info(
+      `[User Exists] - Trying to find the user with username: ${username}`,
+    );
+    result = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
   }
+  // if (result) {
+  //   logger.error(
+  //     `[User Exists] - User already exits with this email / username - ${result.email} / ${result.username}`,
+  //   );
+  //   throw new AppError(
+  //     `User exists with email - ${result.email}`,
+  //     HTTP_STATUS.BAD_REQUEST,
+  //   );
+  // }
+  return result;
 }
 
 export async function getUser(id: string) {
@@ -203,7 +197,7 @@ export async function getUser(id: string) {
       `[GET USER] Generating signed URL for profile image - userId: ${id}, key: ${result.profileImgKey}`,
     );
     try {
-      let url = await getProfileImageUrl(result.profileImgKey);
+      const url = await getProfileImageUrl(result.profileImgKey);
       result.profileImgKey = url;
       logger.info(
         `[GET USER] Profile image URL generated successfully - userId: ${id}`,
@@ -271,7 +265,7 @@ export async function getAllUsers(filter: {
 export async function deleteUser(id: string) {
   // check the current status, if the current status of the user is inActive=true, then check who is deleting ? if current user is Admin. hard delete (2nd time) : soft delete (isActive = true)
 
-  let result = await prisma.user.update({
+  const result = await prisma.user.update({
     where: {
       id,
     },
@@ -292,12 +286,12 @@ export async function updateUser(
   req: Request,
   imgKey: string | null,
 ) {
-  let { firstname, lastname, email, username, password, role, profileImgKey } =
+  const { firstname, lastname, email, username, password, role } =
     req.body;
 
   const profileImg = req.file ?? null;
 
-  let updateUser: Prisma.UserUpdateInput = {
+  const updateUser: Prisma.UserUpdateInput = {
     firstname: firstname ? firstname : undefined,
     lastname: lastname ? lastname : undefined,
     email: email ? email : undefined,
@@ -320,7 +314,7 @@ export async function updateUser(
     }),
   };
 
-  let result = await prisma.user.update({
+  const result = await prisma.user.update({
     where: {
       id: id,
     },

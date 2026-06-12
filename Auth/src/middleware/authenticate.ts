@@ -33,21 +33,23 @@ export async function authenticate(
   next: NextFunction,
 ) {
   try {
-    let refToken = req.cookies.refreshToken;
-    let accToken = req.cookies.accessToken;
-    let verifyToken = req.cookies.verify;
+    const refToken = req.cookies.refreshToken;
+    const accToken = req.cookies.accessToken;
+    const verifyToken = req.cookies.verify;
 
-    verifyToken
-      ? logger.info(
-          `[AUTHENTICATE] verify token is present in the cookies. verify: ${verifyToken}`,
-        )
-      : logger.info(
-          `[AUTHENTICATE] Tokens present - Access: ${!!accToken}, Refresh: ${!!refToken}`,
-        );
+    if (verifyToken) {
+      logger.info(
+        `[AUTHENTICATE] verify token is present in the cookies. verify: ${verifyToken}`,
+      );
+    } else {
+      logger.info(
+        `[AUTHENTICATE] Tokens present - Access: ${!!accToken}, Refresh: ${!!refToken}`,
+      );
+    }
 
-    let accKey = process.env.ACCESS_TOKEN_SECRET;
-    let refKey = process.env.REFRESH_TOKEN_SECRET;
-    let verifyKey = process.env.VERIFY_TOKEN_SECRET;
+    const accKey = process.env.ACCESS_TOKEN_SECRET;
+    const refKey = process.env.REFRESH_TOKEN_SECRET;
+    const verifyKey = process.env.VERIFY_TOKEN_SECRET;
 
     if (!accKey || !refKey) {
       throw new AppError(
@@ -67,7 +69,7 @@ export async function authenticate(
           `[AUTHENTICATE] Access token verified for user ${decodeAcc.userId}`,
         );
 
-        let refResult = await getRefToken(decodeAcc.refreshId);
+        const refResult = await getRefToken(decodeAcc.refreshId);
 
         if (!refResult) {
           logger.error(
@@ -86,7 +88,7 @@ export async function authenticate(
           );
         }
 
-        let match = await checkToken(refToken, refResult.token);
+        const match = await checkToken(refToken, refResult.token);
 
         if (!match) {
           logger.error(`[AUTHENTICATE] Token does not matches`);
@@ -104,11 +106,11 @@ export async function authenticate(
           logger.warn(
             `[AUTHENTICATE] Access token expired, attempting rotation`,
           );
-          let decodeRef = jwt.verify(refToken, refKey) as customPayload;
+          const decodeRef = jwt.verify(refToken, refKey) as customPayload;
           logger.info(
             `[AUTHENTICATE] Rotating tokens for user ${decodeRef.userId}`,
           );
-          let { newRef, newAcc } = await rotateToken(refToken, decodeRef);
+          const { newRef, newAcc } = await rotateToken(refToken, decodeRef);
 
           res.clearCookie("accessToken");
           res.clearCookie("refreshToken");
@@ -144,7 +146,7 @@ export async function authenticate(
       logger.info(
         `[AUTHENTICATE] Only refresh token present, verifying and rotating`,
       );
-      let decodeRef: customPayload = jwt.verify(
+      const decodeRef: customPayload = jwt.verify(
         refToken,
         refKey,
       ) as customPayload;
@@ -153,7 +155,7 @@ export async function authenticate(
         `[AUTHENTICATE] Refresh token verified for user ${decodeRef.userId}`,
       );
 
-      let { newRef, newAcc } = await rotateToken(refToken, decodeRef);
+      const { newRef, newAcc } = await rotateToken(refToken, decodeRef);
 
       res.clearCookie("accessToken");
       res.clearCookie("refreshToken");
@@ -182,7 +184,7 @@ export async function authenticate(
             HTTP_STATUS.INTERNAL_SERVER_ERROR,
           );
       }
-      let decodeVerify: customPayload = jwt.verify(
+      const decodeVerify: customPayload = jwt.verify(
         verifyToken,
         verifyKey,
       ) as customPayload;
@@ -228,7 +230,7 @@ function attachUserToRequest(userDetails: customPayload, req: Request) {
   //   throw new AppError(`No user object found.`);
   // }
 
-  let reqUser: ReqUser = {
+  const reqUser: ReqUser = {
     email: userDetails.email,
     authProvider: userDetails.authProvider,
     role: userDetails.role,
