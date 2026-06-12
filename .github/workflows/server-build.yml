@@ -27,7 +27,8 @@ jobs:
         run: npm run prisma:generate
         working-directory: ./Auth
         env:
-         DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
         
       - name: Run Build
         run: npm run build
