@@ -49,6 +49,5 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/auth", authRouter);
 
 app.listen(PORT, () => {
-  //   console.log(`Server started at http://localhost:${PORT}`);
   logger.info(`Server started at http://localhost:${PORT}`);
 });
