@@ -33,21 +33,23 @@ export async function authenticate(
   next: NextFunction,
 ) {
   try {
-    let refToken = req.cookies.refreshToken;
-    let accToken = req.cookies.accessToken;
-    let verifyToken = req.cookies.verify;
+    const refToken = req.cookies.refreshToken;
+    const accToken = req.cookies.accessToken;
+    const verifyToken = req.cookies.verify;
 
-    verifyToken
-      ? logger.info(
+    if (verifyToken) {
+      logger.info(
         `[AUTHENTICATE] verify token is present in the cookies. verify: ${verifyToken}`,
-      )
-      : logger.info(
+      );
+    } else {
+      logger.info(
         `[AUTHENTICATE] Tokens present - Access: ${!!accToken}, Refresh: ${!!refToken}`,
       );
+    }
 
-    let accKey = process.env.ACCESS_TOKEN_SECRET;
-    let refKey = process.env.REFRESH_TOKEN_SECRET;
-    let verifyKey = process.env.VERIFY_TOKEN_SECRET;
+    const accKey = process.env.ACCESS_TOKEN_SECRET;
+    const refKey = process.env.REFRESH_TOKEN_SECRET;
+    const verifyKey = process.env.VERIFY_TOKEN_SECRET;
 
     if (!accKey || !refKey) {
       throw new AppError(
@@ -67,7 +69,7 @@ export async function authenticate(
           `[AUTHENTICATE] Access token verified for user ${decodeAcc.userId}`,
         );
 
-        let refResult = await getRefToken(decodeAcc.refreshId);
+        const refResult = await getRefToken(decodeAcc.refreshId);
 
         if (!refResult) {
           logger.error(
@@ -86,7 +88,7 @@ export async function authenticate(
           );
         }
 
-        let match = await checkToken(refToken, refResult.token);
+        const match = await checkToken(refToken, refResult.token);
 
         if (!match) {
           logger.error(`[AUTHENTICATE] Token does not matches`);
@@ -99,16 +101,17 @@ export async function authenticate(
         attachUserToRequest(decodeAcc, req);
         next();
         return;
-      } catch (err: any) {
-        if (err.name === "TokenExpiredError") {
+      } catch (err: unknown) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        if (error.name === "TokenExpiredError") {
           logger.warn(
             `[AUTHENTICATE] Access token expired, attempting rotation`,
           );
-          let decodeRef = jwt.verify(refToken, refKey) as customPayload;
+          const decodeRef = jwt.verify(refToken, refKey) as customPayload;
           logger.info(
             `[AUTHENTICATE] Rotating tokens for user ${decodeRef.userId}`,
           );
-          let { newRef, newAcc } = await rotateToken(refToken, decodeRef);
+          const { newRef, newAcc } = await rotateToken(refToken, decodeRef);
 
           res.clearCookie("accessToken");
           res.clearCookie("refreshToken");
@@ -132,7 +135,7 @@ export async function authenticate(
           return;
         } else {
           logger.error(
-            `[AUTHENTICATE] Token verification failed: ${err.message}`,
+            `[AUTHENTICATE] Token verification failed: ${error.message}`,
           );
           throw new AppError(
             ERROR_MESSAGES.UNAUTHORIZED,
@@ -144,7 +147,7 @@ export async function authenticate(
       logger.info(
         `[AUTHENTICATE] Only refresh token present, verifying and rotating`,
       );
-      let decodeRef: customPayload = jwt.verify(
+      const decodeRef: customPayload = jwt.verify(
         refToken,
         refKey,
       ) as customPayload;
@@ -153,7 +156,7 @@ export async function authenticate(
         `[AUTHENTICATE] Refresh token verified for user ${decodeRef.userId}`,
       );
 
-      let { newRef, newAcc } = await rotateToken(refToken, decodeRef);
+      const { newRef, newAcc } = await rotateToken(refToken, decodeRef);
 
       res.clearCookie("accessToken");
       res.clearCookie("refreshToken");
@@ -182,7 +185,7 @@ export async function authenticate(
           HTTP_STATUS.INTERNAL_SERVER_ERROR,
         );
       }
-      let decodeVerify: customPayload = jwt.verify(
+      const decodeVerify: customPayload = jwt.verify(
         verifyToken,
         verifyKey,
       ) as customPayload;
@@ -198,18 +201,19 @@ export async function authenticate(
       logger.error(`[AUTHENTICATE] No valid tokens provided`);
       throw new AppError(ERROR_MESSAGES.UNAUTHORIZED, HTTP_STATUS.UNAUTHORIZED);
     }
-  } catch (err: any) {
-    if (err.name === "TokenExpiredError") {
-      logger.warn(`[AUTHENTICATE] Token expired: ${err.message}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    if (error.name === "TokenExpiredError") {
+      logger.warn(`[AUTHENTICATE] Token expired: ${error.message}`);
     } else {
-      logger.error(`[AUTHENTICATE] Auth error (${err.name}): ${err.message}`);
+      logger.error(`[AUTHENTICATE] Auth error (${error.name}): ${error.message}`);
     }
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
-        message: err.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
       });
   }
 }
@@ -228,7 +232,7 @@ function attachUserToRequest(userDetails: customPayload, req: Request) {
   //   throw new AppError(`No user object found.`);
   // }
 
-  let reqUser: ReqUser = {
+  const reqUser: ReqUser = {
     email: userDetails.email,
     authProvider: userDetails.authProvider,
     role: userDetails.role,

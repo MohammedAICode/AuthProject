@@ -1,4 +1,3 @@
-import { Request } from "express";
 import { Prisma, User } from "../../../generated/prisma/client";
 import { AuthProvider } from "../../../generated/prisma/enums";
 import { ERROR_MESSAGES, HTTP_STATUS } from "../../common/constant/constants";
@@ -32,7 +31,7 @@ export async function loginUser(user: {
   let refToken = null;
   let accToken = null;
 
-  let found = await userExists(user.email, "", "");
+  const found = await userExists(user.email, "", "");
 
   if (!found) {
     throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.BAD_REQUEST);
@@ -46,7 +45,7 @@ export async function loginUser(user: {
       );
     }
 
-    let result = await checkPassword(user.password, found.password);
+    const result = await checkPassword(user.password, found.password);
 
     if (!result) {
       throw new AppError(
@@ -58,7 +57,7 @@ export async function loginUser(user: {
     // generate the token and refresh token. return into the cookies.
     refToken = await generateRefToken(found);
 
-    let { token, id } = await storeRefreshToken(refToken, found);
+    const { token, id } = await storeRefreshToken(refToken, found);
 
     if (!token || !id) {
       logger.error(`No refresh-token and Id is generated.`);
@@ -212,7 +211,7 @@ export async function rotateToken(
 }> {
   logger.info(`[AUTHENTICATE] Rotating token for user ${refToken.userId}`);
 
-  let refResult = await getRefTokenByUserID(refToken.userId);
+  const refResult = await getRefTokenByUserID(refToken.userId);
 
   if (!refResult) {
     logger.error(
@@ -238,7 +237,7 @@ export async function rotateToken(
     );
   }
 
-  let user: Prisma.UserCreateInput = {
+  const user: Prisma.UserCreateInput = {
     firstname: "",
     id: refToken.userId,
     email: refToken.email,
@@ -246,9 +245,9 @@ export async function rotateToken(
     authProvider: convertAuthProvider(refToken.authProvider),
   };
 
-  let newRef = await generateRefToken(user);
+  const newRef = await generateRefToken(user);
 
-  let { token, id } = await storeRefreshToken(newRef, user);
+  const { token, id } = await storeRefreshToken(newRef, user);
 
   if (!token || !id) {
     logger.error(
@@ -260,7 +259,7 @@ export async function rotateToken(
     );
   }
 
-  let newAcc = await generateAccToken(user, id);
+  const newAcc = await generateAccToken(user, id);
   logger.info(
     `[AUTHENTICATE] Successfully rotated tokens for user ${refToken.userId}`,
   );
@@ -274,7 +273,7 @@ export async function rotateToken(
 export async function logoutUser(user: ReqUser): Promise<void> {
   logger.info(`[LOGOUT] Logging out user ${user.userId}`);
 
-  let existingTokens = await prisma.token.findMany({
+  const existingTokens = await prisma.token.findMany({
     where: {
       userId: user.userId,
     },
@@ -340,20 +339,21 @@ export async function meDetails(
       `[GET USER] Generating signed URL for profile image - userId: ${user.id}, key: ${user.profileImgKey}`,
     );
     try {
-      let url = await getProfileImageUrl(user.profileImgKey);
+      const url = await getProfileImageUrl(user.profileImgKey);
       user.profileImgKey = url;
       logger.info(
         `[GET USER] Profile image URL generated successfully - userId: ${user.id}`,
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
       logger.error(
-        `[GET USER] Failed to generate signed URL - userId: ${user.id}, error: ${err.message}`,
+        `[GET USER] Failed to generate signed URL - userId: ${user.id}, error: ${error.message}`,
       );
       // Return user without profile image URL instead of failing
       user.profileImgKey = null;
     }
   }
-  const { id, ...safeUser } = user;
+  const { id: _id, ...safeUser } = user; // eslint-disable-line @typescript-eslint/no-unused-vars
 
   logger.info(`[ME] Successfully retrieved details for user ${userId}`);
   return safeUser;
@@ -432,7 +432,7 @@ export async function verifyUserEmail(user: User) {
     throw new AppError(ERROR_MESSAGES.INVALID_REQUEST, HTTP_STATUS.BAD_REQUEST);
   }
 
-  let token = await generateVerifyToken(user);
+  const token = await generateVerifyToken(user);
 
   await redisClient.del(user.id);
 
@@ -440,7 +440,7 @@ export async function verifyUserEmail(user: User) {
 }
 
 export async function updatePass(user: User, newPassword: string) {
-  let updatedResult = await prisma.user.update({
+  const updatedResult = await prisma.user.update({
     where: {
       email: user.email,
     },

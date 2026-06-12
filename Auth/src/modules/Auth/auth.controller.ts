@@ -20,14 +20,13 @@ import { ReqUser } from "../../common/types/express";
 import { userExists } from "../User/user.service";
 import { eventBus } from "../../lib/eventBus";
 import { EVENT_CONSTANTS } from "../../common/EventListener/Listener";
-import { error } from "node:console";
 import passport from "passport";
 import { generateAccToken, generateRefToken } from "../../common/utils/utils";
 // import { sendEmail } from "../../lib/simpleEmailService";
 
 export async function login(req: Request, res: Response) {
   try {
-    let {
+    const {
       email, // extend this to support for the username
       password,
     } = req.body;
@@ -41,7 +40,7 @@ export async function login(req: Request, res: Response) {
 
     // sendEmail();
 
-    let { refToken, accToken } = await loginUser({
+    const { refToken, accToken } = await loginUser({
       email,
       password,
     });
@@ -70,14 +69,15 @@ export async function login(req: Request, res: Response) {
       data: email,
       message: AUTH_MESSAGES.LOGIN_SUCCESS,
     });
-  } catch (err: any) {
-    logger.error(`[LOGIN] ERROR OCCURED, while login err: ${err}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[LOGIN] ERROR OCCURED, while login err: ${error.message}`);
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
-        message: err.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
       });
   }
 }
@@ -87,7 +87,7 @@ export async function logout(req: Request, res: Response) {
     `[LOGOUT] Request to logout the user with email: ${req.user?.email}`,
   );
   try {
-    let user: ReqUser | undefined = req.user;
+    const user: ReqUser | undefined = req.user;
 
     if (!user) {
       logger.error(
@@ -107,10 +107,11 @@ export async function logout(req: Request, res: Response) {
       data: user.email,
       message: ERROR_MESSAGES.USER_LOGOUT_SUCCESS,
     });
-  } catch (err: any) {
-    logger.error(`[LOGOUT] Error occured: ${err}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[LOGOUT] Error occured: ${error.message}`);
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
@@ -124,14 +125,14 @@ export async function me(req: Request, res: Response) {
     `[ME] Request to get /me details for the user : ${req.user?.email}`,
   );
   try {
-    let user: ReqUser | undefined = req.user;
+    const user: ReqUser | undefined = req.user;
 
     if (!user) {
       logger.info(`[ME] No user found in the requesting object.`);
       throw new AppError(ERROR_MESSAGES.UNAUTHORIZED, HTTP_STATUS.UNAUTHORIZED);
     }
 
-    let result = await meDetails(user.userId);
+    const result = await meDetails(user.userId);
 
     if (!result) {
       logger.error(`[ME] No user found in the database. ${result}`);
@@ -151,10 +152,11 @@ export async function me(req: Request, res: Response) {
       data: result,
       message: USER_MESSAGES.USER_GET_SUCCESS,
     });
-  } catch (err: any) {
-    logger.error(`[ME] Error occured: ${err}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[ME] Error occured: ${error.message}`);
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
@@ -166,10 +168,10 @@ export async function me(req: Request, res: Response) {
 
 export async function reset(req: Request, res: Response) {
   try {
-    let { email } = req.params;
-    let { newPassword, oldPassword } = req.body;
+    const { email } = req.params;
+    const { newPassword, oldPassword } = req.body;
 
-    let userResult = await userExists(email as string, null, null);
+    const userResult = await userExists(email as string, null, null);
 
     if (!userResult) {
       throw new AppError(
@@ -178,7 +180,7 @@ export async function reset(req: Request, res: Response) {
       );
     }
 
-    let result = await resetPassword(oldPassword, newPassword, userResult);
+    const result = await resetPassword(oldPassword, newPassword, userResult);
 
     if (!result) {
       throw new AppError(
@@ -192,9 +194,10 @@ export async function reset(req: Request, res: Response) {
       data: result.email,
       message: USER_MESSAGES.USER_UPDATE_SUCCESS,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
@@ -223,7 +226,7 @@ export async function forgetPassword(req: Request, res: Response) {
       );
     }
 
-    let result = await userExists(email as string, null, null);
+    const result = await userExists(email as string, null, null);
 
     if (!result) {
       logger.info(
@@ -243,9 +246,10 @@ export async function forgetPassword(req: Request, res: Response) {
       data: null,
       message: USER_MESSAGES.USER_FORGET_SUCCESS,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
@@ -286,7 +290,7 @@ export async function verifyOTP(req: Request, res: Response) {
       });
     }
 
-    let key = await verifyUserEmail(result);
+    const key = await verifyUserEmail(result);
 
     res.cookie("verify", key, {
       httpOnly: true,
@@ -300,9 +304,10 @@ export async function verifyOTP(req: Request, res: Response) {
       data: null,
       message: "User verify successfully",
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
@@ -314,7 +319,7 @@ export async function verifyOTP(req: Request, res: Response) {
 export async function updatePassword(req: Request, res: Response) {
   try {
     const { password, confirmPassword } = req.body;
-    let currUser = req.user;
+    const currUser = req.user;
 
     if (!currUser) {
       logger.error(`[UPDATE_PASSWORD] current user not found.`);
@@ -334,7 +339,7 @@ export async function updatePassword(req: Request, res: Response) {
       );
     }
 
-    let userResult = await userExists(currUser.email, null, null);
+    const userResult = await userExists(currUser.email, null, null);
 
     if (!userResult) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -344,7 +349,7 @@ export async function updatePassword(req: Request, res: Response) {
       });
     }
 
-    let result = await updatePass(userResult, password);
+    const result = await updatePass(userResult, password);
 
     res.clearCookie("verify");
 
@@ -353,9 +358,10 @@ export async function updatePassword(req: Request, res: Response) {
       data: result.email,
       message: USER_MESSAGES.USER_UPDATE_SUCCESS,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,

@@ -42,9 +42,10 @@ async function validateDb(): Promise<void> {
     await prisma.$connect();
     await prisma.$queryRaw`SELECT 1`;
     logger.info(`[DB VALIDATION] Database connection validated successfully`);
-  } catch (err: any) {
-    logger.error(`[DB VALIDATION] Database connection failed: ${err.message}`);
-    throw new AppError(`Database connection failed: ${err.message}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[DB VALIDATION] Database connection failed: ${error.message}`);
+    throw new AppError(`Database connection failed: ${error.message}`);
   }
 }
 
@@ -61,19 +62,20 @@ async function validateS3(): Promise<void> {
     );
 
     logger.info(`[S3 VALIDATION] Bucket access validated successfully.`);
-  } catch (err: any) {
-    logger.error(`[S3 VALIDATION] Bucket validation failed: ${err.message}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[S3 VALIDATION] Bucket validation failed: ${error.message}`);
 
-    if (err.name === "NotFound") {
+    if (error.name === "NotFound") {
       throw new AppError(
         `S3 bucket '${process.env.AWS_S3_BUCKET}' does not exist`,
       );
-    } else if (err.name === "Forbidden") {
+    } else if (error.name === "Forbidden") {
       throw new AppError(
         `No permission to access S3 bucket '${process.env.AWS_S3_BUCKET}'`,
       );
     } else {
-      throw new AppError(`S3 validation failed: ${err.message}`);
+      throw new AppError(`S3 validation failed: ${error.message}`);
     }
   }
 }
@@ -85,9 +87,10 @@ async function validateSES(): Promise<void> {
     await ses.send(new GetSendQuotaCommand({}));
 
     logger.info(`[SES VALIDATION] SES access validated successfully`);
-  } catch (err: any) {
-    logger.error(`[SES VALIDATION] SES access failed: ${err.message}`);
-    throw new AppError(`SES validation failed: ${err.message}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[SES VALIDATION] SES access failed: ${error.message}`);
+    throw new AppError(`SES validation failed: ${error.message}`);
   }
 }
 
@@ -100,16 +103,17 @@ async function validateRedis(): Promise<void> {
       logger.info(` REDIS access validated successfully`);
     });
 
-    redisClient.on("error", (err) => {
+    redisClient.on("error", (err: Error) => {
       logger.error(`[REDIS VALIDATION] Redis failed to connect ${err.message}`);
-      throw new AppError(err, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+      throw new AppError(err.message, HTTP_STATUS.INTERNAL_SERVER_ERROR);
     });
 
     logger.info(`[REDIS VALIDATION] redis access validated successfully`);
-  } catch (err: any) {
-    logger.error(`[REDIS VALIDATION] redis access failed: ${err.message}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[REDIS VALIDATION] redis access failed: ${error.message}`);
     throw new AppError( 
-      `REDIS validation failed: ${err.message}`,
+      `REDIS validation failed: ${error.message}`,
       HTTP_STATUS.INTERNAL_SERVER_ERROR,
     );
   }

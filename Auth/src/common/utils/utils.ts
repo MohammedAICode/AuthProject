@@ -1,6 +1,6 @@
 import { logger } from "../../lib/logger";
 import bcrypt from "bcrypt";
-import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import {
   AuthProvider,
   Prisma,
@@ -9,7 +9,6 @@ import {
 } from "../../../generated/prisma/client";
 import { AppError } from "../errors/AppError";
 import { ERROR_MESSAGES, HTTP_STATUS } from "../constant/constants";
-import { storeRefreshToken } from "../../modules/Auth/auth.service";
 import { validateServices } from "../../modules/ServiceValidation/validate.service";
 import crypto from "crypto";
 
@@ -18,8 +17,9 @@ import crypto from "crypto";
 export async function startServer() {
     try {
       await validateServices();
-    } catch(err: any) {
-      logger.error(`Failed to start server: ${err.message}`)
+    } catch(err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      logger.error(`Failed to start server: ${error.message}`)
       process.exit(1)
     }
 }
@@ -51,12 +51,12 @@ export async function hashToken(token: string) {
 }
 
 export async function checkToken(token: string, hToken: string) {
-  let result = await bcrypt.compare(token, hToken);
+  const result = await bcrypt.compare(token, hToken);
   return result;
 }
 
 export async function checkPassword(userPassword: string, dbPassword: string) {
-  let result = await bcrypt.compare(userPassword, dbPassword);
+  const result = await bcrypt.compare(userPassword, dbPassword);
   return result;
 }
 
@@ -66,7 +66,7 @@ export async function generateAccToken(user: User | Prisma.UserCreateInput, refr
   // then check the expiration | revoked thing
 
   try {
-    let payload: {} = {
+    const payload: object = {
       userId: user.id,
       email: user.email,
       role: user.role,
@@ -75,8 +75,8 @@ export async function generateAccToken(user: User | Prisma.UserCreateInput, refr
       type: "ACCESS",
     };
 
-    let key = process.env.ACCESS_TOKEN_SECRET;
-    let duration = process.env.ACCESS_TOKEN_EXPIRY;
+    const key = process.env.ACCESS_TOKEN_SECRET;
+    const duration = process.env.ACCESS_TOKEN_EXPIRY;
 
     if (!key || !duration) {
       logger.error(`Unable to access the environment variables. key: ${key}`);
@@ -86,22 +86,24 @@ export async function generateAccToken(user: User | Prisma.UserCreateInput, refr
       );
     }
 
-    let result = jwt.sign(payload, key, {
+    const result = jwt.sign(payload, key, {
       expiresIn: duration as SignOptions["expiresIn"],
     });
 
     return result;
-  } catch (err: any) {
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    const statusCode = (error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
     throw new AppError(
       err.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-      err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      statusCode,
     );
   }
 }
 
 export async function generateRefToken(user: User | Prisma.UserCreateInput) {
   try {
-    let payload: {} = {
+    const payload: object = {
       userId: user.id,
       email: user.email,
       role: user.role,
@@ -109,8 +111,8 @@ export async function generateRefToken(user: User | Prisma.UserCreateInput) {
       type: "REFRESH",
     };
 
-    let key = process.env.REFRESH_TOKEN_SECRET;
-    let duration = process.env.REFRESH_TOKEN_EXPIRY;
+    const key = process.env.REFRESH_TOKEN_SECRET;
+    const duration = process.env.REFRESH_TOKEN_EXPIRY;
 
     if (!key || !duration) {
       logger.error(`Unable to access the environment variables. key: ${key}`);
@@ -120,15 +122,17 @@ export async function generateRefToken(user: User | Prisma.UserCreateInput) {
       );
     }
 
-    let result = jwt.sign(payload, key, {
+    const result = jwt.sign(payload, key, {
       expiresIn: duration as SignOptions["expiresIn"],
     });
 
     return result;
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    const statusCode = (err as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
     throw new AppError(
-      err.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-      err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      statusCode,
     );
   }
 }
@@ -139,7 +143,7 @@ export async function generateVerifyToken(user: User | Prisma.UserCreateInput, )
   // then check the expiration | revoked thing
 
   try {
-    let payload: {} = {
+    const payload: object = {
       userId: user.id,
       email: user.email,
       role: user.role,
@@ -147,8 +151,8 @@ export async function generateVerifyToken(user: User | Prisma.UserCreateInput, )
       type: "VERIFY",
     };
 
-    let key = process.env.VERIFY_TOKEN_SECRET;
-    let duration = process.env.VERIFY_TOKEN_EXPIRY;
+    const key = process.env.VERIFY_TOKEN_SECRET;
+    const duration = process.env.VERIFY_TOKEN_EXPIRY;
 
     if (!key || !duration) {
       logger.error(`Unable to access the environment variables. key: ${key}`);
@@ -158,15 +162,17 @@ export async function generateVerifyToken(user: User | Prisma.UserCreateInput, )
       );
     }
 
-    let result = jwt.sign(payload, key, {
+    const result = jwt.sign(payload, key, {
       expiresIn: duration as SignOptions["expiresIn"],
     });
 
     return result;
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    const statusCode = (err as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
     throw new AppError(
-      err.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-      err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      statusCode,
     );
   }
 }
@@ -175,16 +181,16 @@ export function convertRole(role: string): USER_ROLE {
   if (role === USER_ROLE.ADMIN.toString()) {
     return USER_ROLE.ADMIN;
   }
-  return (role = USER_ROLE.USER);
+  return USER_ROLE.USER;
 }
 
 export function convertAuthProvider(authProvider: string): AuthProvider {
   if (authProvider === AuthProvider.GOOGLE.toString()) {
-    return (authProvider = AuthProvider.GOOGLE);
+    return AuthProvider.GOOGLE;
   } else if (authProvider === AuthProvider.META.toString()) {
-    return (authProvider = AuthProvider.META);
+    return AuthProvider.META;
   }
-  return (authProvider = AuthProvider.LOCAL);
+  return AuthProvider.LOCAL;
 }
 
 export function generateOTP() {

@@ -25,7 +25,7 @@ async function sendActivationMail(user: Omit<User, "password">) {
 
     const link = `${process.env.UIOrigin || "http://localhost:4000"}/verify?email=${user.email}&otp=${otp}`;
 
-    let body = loadTemplate("activation.html", {
+    const body = loadTemplate("activation.html", {
       NAME: user.firstname + " " + user.lastname,
       OTP_DIGITS_HTML: buildOtpDigitsHtml(otp),
       EXPIRY_MINUTES: "10",
@@ -45,9 +45,10 @@ async function sendActivationMail(user: Omit<User, "password">) {
     logger.info(
       `[EVENT USER_CREATE] ${EMAIL_MESSAGES.ACTIVATION_EMAIL_SENT} - userId: ${user.id}, email: ${user.email}`,
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
     logger.error(
-      `[EVENT USER_CREATE] ${EMAIL_MESSAGES.ACTIVATION_EMAIL_FAILED} - userId: ${user.id}, email: ${user.email}, error: ${error.message}`,
+      `[EVENT USER_CREATE] ${EMAIL_MESSAGES.ACTIVATION_EMAIL_FAILED} - userId: ${user.id}, email: ${user.email}, error: ${err.message}`,
     );
   }
 }
@@ -62,7 +63,7 @@ async function sendForgetPasswordMail(user: Omit<User, "password">) {
 
     const link = `${process.env.UIOrigin || "http://localhost:4000"}/verify?email=${user.email}&otp=${otp}`;
 
-    let body = loadTemplate("reset.html", {
+    const body = loadTemplate("reset.html", {
       NAME: user.firstname + " " + user.lastname,
       OTP_DIGITS_HTML: buildOtpDigitsHtml(otp),
       EXPIRY_MINUTES: "10",
@@ -82,9 +83,10 @@ async function sendForgetPasswordMail(user: Omit<User, "password">) {
     logger.info(
       `[EVENT FORGET_PASSWORD] ${EMAIL_MESSAGES.FORGET_EMAIL_SENT} - userId: ${user.id}, email: ${user.email}`,
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
     logger.error(
-      `[EVENT FORGET_PASSWORD] ${EMAIL_MESSAGES.FORGET_EMAIL_FAILED} - userId: ${user.id},  email: ${user.email}, error: ${error.message}`,
+      `[EVENT FORGET_PASSWORD] ${EMAIL_MESSAGES.FORGET_EMAIL_FAILED} - userId: ${user.id},  email: ${user.email}, error: ${err.message}`,
     );
   }
 }

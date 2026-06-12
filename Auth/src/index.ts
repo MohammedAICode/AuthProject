@@ -1,4 +1,4 @@
-import express from "express";
+import express, {Request, Response} from "express";
 import "dotenv/config";
 import { logger } from "./lib/logger";
 import { userRouter } from "./modules/User/user.routes";
@@ -37,7 +37,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/health", (req, res) => {
+app.get("/health", (req: Request, res:Response) => {
   res.status(HTTP_STATUS.OK).json({
     error: false,
     data: null,
@@ -49,6 +49,5 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/auth", authRouter);
 
 app.listen(PORT, () => {
-  //   console.log(`Server started at http://localhost:${PORT}`);
   logger.info(`Server started at http://localhost:${PORT}`);
 });

@@ -32,8 +32,9 @@ export async function sendEmail(emailData: EmailData) {
     logger.info(`[SES EMAIL] Email sent successfully - MessageId: ${result.MessageId}, to: ${emailData.to.join(', ')}`);
     
     return result;
-  } catch (error: any) {
-    logger.error(`[SES EMAIL] Failed to send email - to: ${emailData.to.join(', ')}, subject: "${emailData.subject}", error: ${error.message}`);
-    throw error;
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    logger.error(`[SES EMAIL] Failed to send email - to: ${emailData.to.join(', ')}, subject: "${emailData.subject}", error: ${err.message}`);
+    throw err;
   }
 }
