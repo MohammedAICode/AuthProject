@@ -3,7 +3,7 @@ name: Build on PR
 on:
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   build:
@@ -17,6 +17,10 @@ jobs:
       
       - name: Install Dependencies
         run: npm install
+        working-directory: ./Auth
+
         
       - name: Run Build
         run: npm run build
+        working-directory: ./Auth
+
