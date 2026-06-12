@@ -47,6 +47,7 @@ export async function authenticate(
 
     let accKey = process.env.ACCESS_TOKEN_SECRET;
     let refKey = process.env.REFRESH_TOKEN_SECRET;
+    let verifyKey = process.env.VERIFY_TOKEN_SECRET;
 
     if (!accKey || !refKey) {
       throw new AppError(
@@ -175,9 +176,15 @@ export async function authenticate(
       next();
       return;
     } else if (verifyToken) {
+      if(!verifyKey) {
+        throw new AppError(
+            ERROR_MESSAGES.INVALID_ENV,
+            HTTP_STATUS.INTERNAL_SERVER_ERROR,
+          );
+      }
       let decodeVerify: customPayload = jwt.verify(
         verifyToken,
-        accKey,
+        verifyKey,
       ) as customPayload;
 
       const isVerify = req.headers["x-auth-verify"];
