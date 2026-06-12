@@ -45,9 +45,10 @@ async function sendActivationMail(user: Omit<User, "password">) {
     logger.info(
       `[EVENT USER_CREATE] ${EMAIL_MESSAGES.ACTIVATION_EMAIL_SENT} - userId: ${user.id}, email: ${user.email}`,
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
     logger.error(
-      `[EVENT USER_CREATE] ${EMAIL_MESSAGES.ACTIVATION_EMAIL_FAILED} - userId: ${user.id}, email: ${user.email}, error: ${error.message}`,
+      `[EVENT USER_CREATE] ${EMAIL_MESSAGES.ACTIVATION_EMAIL_FAILED} - userId: ${user.id}, email: ${user.email}, error: ${err.message}`,
     );
   }
 }
@@ -82,9 +83,10 @@ async function sendForgetPasswordMail(user: Omit<User, "password">) {
     logger.info(
       `[EVENT FORGET_PASSWORD] ${EMAIL_MESSAGES.FORGET_EMAIL_SENT} - userId: ${user.id}, email: ${user.email}`,
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
     logger.error(
-      `[EVENT FORGET_PASSWORD] ${EMAIL_MESSAGES.FORGET_EMAIL_FAILED} - userId: ${user.id},  email: ${user.email}, error: ${error.message}`,
+      `[EVENT FORGET_PASSWORD] ${EMAIL_MESSAGES.FORGET_EMAIL_FAILED} - userId: ${user.id},  email: ${user.email}, error: ${err.message}`,
     );
   }
 }

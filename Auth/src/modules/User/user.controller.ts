@@ -43,8 +43,9 @@ export async function register(req: Request, res: Response) {
       data: result.email,
       message: USER_MESSAGES.USER_SAVE_SUCCESS,
     });
-  } catch (err: any) {
-    logger.error(`[REGISTER] Failed - ${err.message}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[REGISTER] Failed - ${error.message}`);
     let statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR;
     if (err instanceof AppError) {
       statusCode = err.statusCode;
@@ -52,7 +53,7 @@ export async function register(req: Request, res: Response) {
     return res.status(statusCode).json({
       error: true,
       data: null,
-      message: err.message || USER_MESSAGES.USER_SAVE_FAILED,
+      message: error.message || USER_MESSAGES.USER_SAVE_FAILED,
     });
   }
 }
@@ -85,8 +86,9 @@ export async function get(req: Request, res: Response) {
       data: result,
       message: USER_MESSAGES.USER_GET_SUCCESS,
     });
-  } catch (err: any) {
-    logger.error(`[GET USER] Error occurred, ${err}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[GET USER] Error occurred, ${error.message}`);
     let statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR;
     if (err instanceof AppError) {
       statusCode = err.statusCode;
@@ -94,7 +96,7 @@ export async function get(req: Request, res: Response) {
     return res.status(statusCode).json({
       error: false,
       data: null,
-      message: err.message || USER_MESSAGES.USER_GET_FAILED,
+      message: error.message || USER_MESSAGES.USER_GET_FAILED,
     });
   }
 }
@@ -136,8 +138,9 @@ export async function getAll(req: Request, res: Response) {
       },
       message: USER_MESSAGES.USER_GET_SUCCESS,
     });
-  } catch (err: any) {
-    logger.error(`[GET USERS] Error occurred, ${err}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[GET USERS] Error occurred, ${error.message}`);
     let statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR;
     if (err instanceof AppError) {
       statusCode = err.statusCode;
@@ -179,8 +182,9 @@ export async function remove(req: Request, res: Response) {
       },
       message: USER_MESSAGES.USER_DELETE_SUCCESS,
     });
-  } catch (err: any) {
-    logger.error(`[USER DELETE] Error occurred, ${err}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[USER DELETE] Error occurred, ${error.message}`);
     let statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR;
     if (err instanceof AppError) {
       statusCode = err.statusCode;
@@ -188,7 +192,7 @@ export async function remove(req: Request, res: Response) {
     return res.status(statusCode).json({
       error: true,
       data: null,
-      message: err.message || USER_MESSAGES.USER_DELETE_FAILED,
+      message: error.message || USER_MESSAGES.USER_DELETE_FAILED,
     });
   }
 }
@@ -212,8 +216,9 @@ export async function update(req: Request, res: Response) {
       data: result,
       message: USER_MESSAGES.USER_UPDATE_SUCCESS,
     });
-  } catch (err: any) {
-    logger.error(`[USER UPDATE] Error occurred, ${err}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[USER UPDATE] Error occurred, ${error.message}`);
     let statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR;
     if (err instanceof AppError) {
       statusCode = err.statusCode;
@@ -221,7 +226,7 @@ export async function update(req: Request, res: Response) {
     return res.status(statusCode).json({
       error: true,
       data: null,
-      message: err.message || USER_MESSAGES.USER_UPDATE_FAILED,
+      message: error.message || USER_MESSAGES.USER_UPDATE_FAILED,
     });
   }
 }

@@ -344,9 +344,10 @@ export async function meDetails(
       logger.info(
         `[GET USER] Profile image URL generated successfully - userId: ${user.id}`,
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
       logger.error(
-        `[GET USER] Failed to generate signed URL - userId: ${user.id}, error: ${err.message}`,
+        `[GET USER] Failed to generate signed URL - userId: ${user.id}, error: ${error.message}`,
       );
       // Return user without profile image URL instead of failing
       user.profileImgKey = null;

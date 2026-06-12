@@ -24,7 +24,7 @@ passport.use(
           );
         }
 
-        let userResult: any = await userExists(email, null, null);
+        let userResult: { id: string; email: string; role: string; authProvider: string; isActive: boolean } | null = await userExists(email, null, null);
 
         if (!userResult) {
           const data = {
@@ -38,9 +38,10 @@ passport.use(
           userResult = await createUserInDB(data);
         }
 
-        return done(null, userResult);
-      } catch (err: any) {
-        return done(err as Error);
+        return done(null, userResult || undefined);
+      } catch (err: unknown) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        return done(error);
       }
     },
   ),

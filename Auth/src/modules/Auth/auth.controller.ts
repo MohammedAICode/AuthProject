@@ -69,14 +69,15 @@ export async function login(req: Request, res: Response) {
       data: email,
       message: AUTH_MESSAGES.LOGIN_SUCCESS,
     });
-  } catch (err: any) {
-    logger.error(`[LOGIN] ERROR OCCURED, while login err: ${err}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[LOGIN] ERROR OCCURED, while login err: ${error.message}`);
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
-        message: err.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
       });
   }
 }
@@ -106,10 +107,11 @@ export async function logout(req: Request, res: Response) {
       data: user.email,
       message: ERROR_MESSAGES.USER_LOGOUT_SUCCESS,
     });
-  } catch (err: any) {
-    logger.error(`[LOGOUT] Error occured: ${err}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[LOGOUT] Error occured: ${error.message}`);
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
@@ -150,10 +152,11 @@ export async function me(req: Request, res: Response) {
       data: result,
       message: USER_MESSAGES.USER_GET_SUCCESS,
     });
-  } catch (err: any) {
-    logger.error(`[ME] Error occured: ${err}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(`[ME] Error occured: ${error.message}`);
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
@@ -191,9 +194,10 @@ export async function reset(req: Request, res: Response) {
       data: result.email,
       message: USER_MESSAGES.USER_UPDATE_SUCCESS,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
@@ -242,9 +246,10 @@ export async function forgetPassword(req: Request, res: Response) {
       data: null,
       message: USER_MESSAGES.USER_FORGET_SUCCESS,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
@@ -299,9 +304,10 @@ export async function verifyOTP(req: Request, res: Response) {
       data: null,
       message: "User verify successfully",
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
@@ -352,9 +358,10 @@ export async function updatePassword(req: Request, res: Response) {
       data: result.email,
       message: USER_MESSAGES.USER_UPDATE_SUCCESS,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,

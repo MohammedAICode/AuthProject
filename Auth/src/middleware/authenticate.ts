@@ -101,8 +101,9 @@ export async function authenticate(
         attachUserToRequest(decodeAcc, req);
         next();
         return;
-      } catch (err: any) {
-        if (err.name === "TokenExpiredError") {
+      } catch (err: unknown) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        if (error.name === "TokenExpiredError") {
           logger.warn(
             `[AUTHENTICATE] Access token expired, attempting rotation`,
           );
@@ -134,7 +135,7 @@ export async function authenticate(
           return;
         } else {
           logger.error(
-            `[AUTHENTICATE] Token verification failed: ${err.message}`,
+            `[AUTHENTICATE] Token verification failed: ${error.message}`,
           );
           throw new AppError(
             ERROR_MESSAGES.UNAUTHORIZED,
@@ -200,18 +201,19 @@ export async function authenticate(
       logger.error(`[AUTHENTICATE] No valid tokens provided`);
       throw new AppError(ERROR_MESSAGES.UNAUTHORIZED, HTTP_STATUS.UNAUTHORIZED);
     }
-  } catch (err: any) {
-    if (err.name === "TokenExpiredError") {
-      logger.warn(`[AUTHENTICATE] Token expired: ${err.message}`);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    if (error.name === "TokenExpiredError") {
+      logger.warn(`[AUTHENTICATE] Token expired: ${error.message}`);
     } else {
-      logger.error(`[AUTHENTICATE] Auth error (${err.name}): ${err.message}`);
+      logger.error(`[AUTHENTICATE] Auth error (${error.name}): ${error.message}`);
     }
     return res
-      .status(err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .status((error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({
         error: true,
         data: null,
-        message: err.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+        message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
       });
   }
 }

@@ -59,9 +59,10 @@ export async function registerUser(req: Request) {
       logger.info(
         `[REGISTER] Profile image uploaded to S3 successfully - userId: ${userId}, key: ${key}`,
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
       logger.error(
-        `[REGISTER] S3 upload failed - continuing registration without profile image. userId: ${userId}, error: ${err.message}`,
+        `[REGISTER] S3 upload failed - continuing registration without profile image. userId: ${userId}, error: ${error.message}`,
       );
     }
   }
@@ -202,9 +203,10 @@ export async function getUser(id: string) {
       logger.info(
         `[GET USER] Profile image URL generated successfully - userId: ${id}`,
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
       logger.error(
-        `[GET USER] Failed to generate signed URL - userId: ${id}, error: ${err.message}`,
+        `[GET USER] Failed to generate signed URL - userId: ${id}, error: ${error.message}`,
       );
       // Return user without profile image URL instead of failing
       result.profileImgKey = null;
@@ -224,7 +226,7 @@ export async function getAllUsers(filter: {
   isActive: string | undefined;
   role: string | undefined;
 }) {
-  const where: any = {
+  const where: Record<string, unknown> = {
     ...(filter.search && {
       OR: [
         { firstname: { contains: filter.search, mode: "insensitive" } },

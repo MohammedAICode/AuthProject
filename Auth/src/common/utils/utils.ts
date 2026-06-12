@@ -17,8 +17,9 @@ import crypto from "crypto";
 export async function startServer() {
     try {
       await validateServices();
-    } catch(err: any) {
-      logger.error(`Failed to start server: ${err.message}`)
+    } catch(err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      logger.error(`Failed to start server: ${error.message}`)
       process.exit(1)
     }
 }
@@ -90,10 +91,12 @@ export async function generateAccToken(user: User | Prisma.UserCreateInput, refr
     });
 
     return result;
-  } catch (err: any) {
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    const statusCode = (error as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
     throw new AppError(
       err.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-      err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      statusCode,
     );
   }
 }
@@ -124,10 +127,12 @@ export async function generateRefToken(user: User | Prisma.UserCreateInput) {
     });
 
     return result;
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    const statusCode = (err as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
     throw new AppError(
-      err.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-      err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      statusCode,
     );
   }
 }
@@ -162,10 +167,12 @@ export async function generateVerifyToken(user: User | Prisma.UserCreateInput, )
     });
 
     return result;
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    const statusCode = (err as { statusCode?: number }).statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
     throw new AppError(
-      err.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-      err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      statusCode,
     );
   }
 }

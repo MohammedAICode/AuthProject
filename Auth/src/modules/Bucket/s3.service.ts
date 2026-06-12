@@ -38,9 +38,10 @@ export async function uploadProfileImgToS3(
     logger.info(`[S3 UPLOAD] Upload successful - userId: ${userId}, key: ${key}, ETag: ${result.ETag}`);
 
     return key;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
     logger.error(
-      `[S3 UPLOAD] Upload failed - userId: ${userId}, filename: ${file.originalname}, error: ${error.message}`,
+      `[S3 UPLOAD] Upload failed - userId: ${userId}, filename: ${file.originalname}, error: ${err.message}`,
     );
     throw new AppError(
       `Failed to upload profile image to S3`,
@@ -67,9 +68,10 @@ export async function getProfileImageUrl(key: string): Promise<string> {
     );
 
     return url;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
     logger.error(
-      `[S3 PRESIGN] Failed to generate signed URL - key: ${key}, error: ${error.message}`,
+      `[S3 PRESIGN] Failed to generate signed URL - key: ${key}, error: ${err.message}`,
     );
     throw new AppError(
       `Failed to generate profile image URL`,
@@ -92,9 +94,10 @@ export async function deleteProfileImg(imgKey: string) {
     logger.info(
       `[S3 DELETE] Delete successful - key: ${imgKey}, versionId: ${result.VersionId || 'N/A'}`,
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     logger.error(
-      `[S3 DELETE] Failed to delete object - key: ${imgKey}, error: ${err.message}`,
+      `[S3 DELETE] Failed to delete object - key: ${imgKey}, error: ${error.message}`,
     );
     throw new AppError(
       `Failed to delete old profile image from S3`,
