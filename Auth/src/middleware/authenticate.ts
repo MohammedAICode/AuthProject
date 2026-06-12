@@ -33,9 +33,9 @@ export async function authenticate(
   next: NextFunction,
 ) {
   try {
-    let refToken = req.cookies.refreshToken;
-    let accToken = req.cookies.accessToken;
-    let verifyToken = req.cookies.verify;
+    const refToken = req.cookies.refreshToken;
+    const accToken = req.cookies.accessToken;
+    const verifyToken = req.cookies.verify;
 
     verifyToken
       ? logger.info(
