@@ -12,7 +12,9 @@
     "prisma:studio": "prisma studio",
     "prisma:push": "prisma db push",
     "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix"
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "docker:build": "docker build -f dockerfile.auth -t auth-app .",
+    "docker:run": "docker run -p 3000:4000 --env-file .env auth-app"
   },
   "keywords": [],
   "author": "",
