@@ -13,7 +13,7 @@
     "prisma:push": "prisma db push",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "docker:build": "docker build -f dockerfile.auth -t auth-app .",
+    "docker:build": "docker build -f Dockerfile.auth -t auth-app .",
     "docker:run": "docker run -p 3000:4000 --env-file .env auth-app"
   },
   "keywords": [],
